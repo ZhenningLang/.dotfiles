@@ -54,13 +54,13 @@ if git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 
   if [ "$IS_CC" = "0" ]; then
     if [ "$ADD" -gt 0 ] || [ "$DEL" -gt 0 ]; then
-      printf "\033[1;38;5;60m%s\033[0m · \033[1;38;5;146m%s\033[0m%b \033[1;38;5;114m+%s \033[1;38;5;174m-%s\033[0m${DIR_LINK}" "$MODEL" "$BRANCH" "$PR_STR" "$ADD" "$DEL"
+      printf "\033[1;38;5;214m%s\033[0m · \033[1;38;5;146m%s\033[0m%b \033[1;38;5;114m+%s \033[1;38;5;174m-%s\033[0m${DIR_LINK}" "$MODEL" "$BRANCH" "$PR_STR" "$ADD" "$DEL"
     else
-      printf "\033[1;38;5;60m%s\033[0m · \033[1;38;5;146m%s\033[0m%b${DIR_LINK}" "$MODEL" "$BRANCH" "$PR_STR"
+      printf "\033[1;38;5;214m%s\033[0m · \033[1;38;5;146m%s\033[0m%b${DIR_LINK}" "$MODEL" "$BRANCH" "$PR_STR"
     fi
   else
-    printf "${OSC_START}vscode://file${CWD}${OSC_END}\033[1;38;5;66m%s\033[0m${OSC_START}${OSC_END}${SEP}\033[1;38;5;146m%s\033[0m${SEP}\033[1;38;5;60m%s\033[0m" "$SHORT_CWD" "$BRANCH" "$MODEL"
+    printf "${OSC_START}vscode://file${CWD}${OSC_END}\033[1;38;5;66m%s\033[0m${OSC_START}${OSC_END}${SEP}\033[1;38;5;146m%s\033[0m${SEP}\033[1;38;5;214m%s\033[0m" "$SHORT_CWD" "$BRANCH" "$MODEL"
   fi
 else
-  printf "\033[1;38;5;60m%s\033[0m${DIR_LINK}" "$MODEL"
+  printf "\033[1;38;5;214m%s\033[0m${DIR_LINK}" "$MODEL"
 fi
