@@ -109,8 +109,31 @@ elif b'supportedReasoningEfforts:L?["off","low","medium","high"]:["none"]' in da
 else:
     results['mod9'] = 'unknown'
 
+# custom6: 替代 mod6 的容错版 (与 mod6 检测结果一致，但用不同方法定位)
+def _custom6_detect():
+    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel', b'peekNextCycleSpecModeModel']:
+        for m in re.finditer(fn_name + rb'\(' + V + rb'(?:,' + V + rb')?\)\{', data):
+            region = data[m.start():m.start() + 800]
+            if b'=this.customModels.map(m=>m.id)' in region:
+                return 'modified'
+            if b'validateModelAccess(' in region:
+                return 'original'
+    return 'unknown'
+
+results['custom6'] = _custom6_detect()
+
+# custom7: 多行历史记录按↓修复
+mod7c_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
+mod7c_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
+if mod7c_modified:
+    results['custom7'] = 'modified'
+elif mod7c_original:
+    results['custom7'] = 'original'
+else:
+    results['custom7'] = 'unknown'
+
 # 输出
-total = 9
+total = 11
 mod_count = sum(1 for v in results.values() if v == 'modified')
 orig_count = sum(1 for v in results.values() if v == 'original')
 
