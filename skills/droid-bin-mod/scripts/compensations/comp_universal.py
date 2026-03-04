@@ -37,7 +37,9 @@ def find_regions(data):
             regions.append((name, offset, content, min_size, rtype))
 
     # 1. FFH 死代码 (mod1 短路后的不可达区域)
-    ffh = data.find(b'function FFH(')
+    # 函数名混淆会变，用 mod1 特征 + 函数签名定位
+    ffh_match = re.search(rb'function (' + V + rb')\(H,A=80,T=3\)', data)
+    ffh = ffh_match.start() if ffh_match else data.find(b'function FFH(')
     if ffh != -1:
         region = data[ffh:ffh + 500]
         s1 = region.find(b'isTruncated:!1}')

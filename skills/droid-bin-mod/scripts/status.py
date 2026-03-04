@@ -17,8 +17,10 @@ results = {}
 # 或 comp_universal 补偿后的直接 return 形态 (FFH 中原始条件 if(!V&&!V) 被移除)
 if b'if(!0||!' in data:
     results['mod1'] = 'modified'
-elif b'function FFH(' in data:
-    ffh = data.find(b'function FFH(')
+else:
+    ffh_match = re.search(rb'function (' + V + rb')\(H,A=80,T=3\)', data)
+    ffh = ffh_match.start() if ffh_match else data.find(b'function FFH(')
+if ffh != -1 and results.get('mod1') != 'modified':
     ffh_region = data[ffh:ffh + 300]
     has_orig_cond = re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)', ffh_region)
     has_direct_return = b'return{text:H,isTruncated:!1}' in ffh_region
