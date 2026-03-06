@@ -13,23 +13,16 @@ with open(droid, 'rb') as f:
 results = {}
 
 # mod1: 截断条件
-# 检测 if(!0||! 短路 (mod1 原始形态)
-# 或 comp_universal 补偿后的直接 return 形态 (FFH 中原始条件 if(!V&&!V) 被移除)
+# 用 isTruncated 定位截断函数（不依赖混淆后的函数名）
+# 原版: if(!V&&!V)return{text:V,isTruncated:!1}
+# 修改: if(!0||!V)return{text:V,isTruncated:!1}
+# 补偿后: ;/* ... */return{text:V,isTruncated:!1} (死代码被替换)
 if b'if(!0||!' in data:
     results['mod1'] = 'modified'
-else:
-    ffh_match = re.search(rb'function (' + V + rb')\(H,A=80,T=3\)', data)
-    ffh = ffh_match.start() if ffh_match else data.find(b'function FFH(')
-if ffh != -1 and results.get('mod1') != 'modified':
-    ffh_region = data[ffh:ffh + 300]
-    has_orig_cond = re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)', ffh_region)
-    has_direct_return = b'return{text:H,isTruncated:!1}' in ffh_region
-    if not has_orig_cond and has_direct_return:
-        results['mod1'] = 'modified'  # comp_universal 补偿后，原始条件已移除
-    elif has_orig_cond:
-        results['mod1'] = 'original'
-    else:
-        results['mod1'] = 'unknown'
+elif re.search(rb'/\*\s+\*/return\{text:' + V + rb',isTruncated:!1\}', data):
+    results['mod1'] = 'modified'  # comp_universal 补偿后形态
+elif re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data):
+    results['mod1'] = 'original'
 else:
     results['mod1'] = 'unknown'
 
@@ -60,21 +53,15 @@ elif re.search(rb'var ' + V + rb'=20,' + V + rb',', data):
 else:
     results['mod4'] = 'unknown'
 
-# mod6: custom model cycle
+# mod6: custom model cycle (容错版, 支持单/双参数签名)
 def _mod6_detect():
-    targets = [b'peekNextCycleModel', b'peekNextCycleSpecModeModel', b'cycleSpecModeModel']
-    modified = original = 0
-    for fn in targets:
-        for m in re.finditer(fn + rb'\(' + V + rb'\)\{', data):
-            region = data[m.start():m.start() + 600]
+    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel', b'peekNextCycleSpecModeModel']:
+        for m in re.finditer(fn_name + rb'\(' + V + rb'(?:,' + V + rb')?\)\{', data):
+            region = data[m.start():m.start() + 800]
             if b'=this.customModels.map(m=>m.id)' in region:
-                modified += 1
-            elif b'validateModelAccess(' in region:
-                original += 1
-    if modified > 0 and original == 0:
-        return 'modified'
-    elif original > 0 and modified == 0:
-        return 'original'
+                return 'modified'
+            if b'validateModelAccess(' in region:
+                return 'original'
     return 'unknown'
 
 results['mod6'] = _mod6_detect()
@@ -111,19 +98,6 @@ elif b'supportedReasoningEfforts:L?["off","low","medium","high"]:["none"]' in da
 else:
     results['mod9'] = 'unknown'
 
-# custom6: 替代 mod6 的容错版 (与 mod6 检测结果一致，但用不同方法定位)
-def _custom6_detect():
-    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel', b'peekNextCycleSpecModeModel']:
-        for m in re.finditer(fn_name + rb'\(' + V + rb'(?:,' + V + rb')?\)\{', data):
-            region = data[m.start():m.start() + 800]
-            if b'=this.customModels.map(m=>m.id)' in region:
-                return 'modified'
-            if b'validateModelAccess(' in region:
-                return 'original'
-    return 'unknown'
-
-results['custom6'] = _custom6_detect()
-
 # custom7: 多行历史记录按↓修复
 mod7c_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
 mod7c_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
@@ -133,6 +107,14 @@ elif mod7c_original:
     results['custom7'] = 'original'
 else:
     results['custom7'] = 'unknown'
+
+# custom9: Option+Left/Right 修复
+if b'if((QA||bA.name)=="b")return Q(),!0;' in data and b'if((QA||bA.name)=="f")return z(),!0;' in data:
+    results['custom9'] = 'modified'
+elif b'if(QA==="b")return Q(),!0;' in data and b'if(QA==="f")return z(),!0;' in data:
+    results['custom9'] = 'original'
+else:
+    results['custom9'] = 'unknown'
 
 # 输出
 total = 11
