@@ -326,5 +326,16 @@
         }
       ]
     }
+  ],
+  "devices": [
+    {
+      "identifiers": {
+        "is_consumer": true,
+        "product_id": 16401,
+        "vendor_id": 11427
+      },
+      "ignore": false,
+      "manipulate_caps_lock_led": false
+    }
   ]
 }

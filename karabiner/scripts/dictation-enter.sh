@@ -12,7 +12,7 @@
 
 STATE_DIR="/tmp/dji-dictation"
 LOG="$STATE_DIR/debug.log"
-TMUX_BIN="/opt/homebrew/bin/tmux"
+TMUX_BIN="${TMUX_BIN:-$(command -v tmux 2>/dev/null || echo /opt/homebrew/bin/tmux)}"
 KCLI="/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
 TYPELESS_DB="$HOME/Library/Application Support/Typeless/typeless.db"
 CONFIRM_WINDOW=2
@@ -66,10 +66,6 @@ active_tmux_pane() {
   $TMUX_BIN list-panes -a \
     -F '#{session_attached} #{window_active} #{pane_active} #{pane_id}' 2>/dev/null \
     | awk '$1==1 && $2==1 && $3==1 {print $4; exit}'
-}
-
-typeless_latest_id() {
-  sqlite3 "$TYPELESS_DB" "SELECT id FROM history ORDER BY created_at DESC LIMIT 1;" 2>/dev/null
 }
 
 typeless_check_done() {
