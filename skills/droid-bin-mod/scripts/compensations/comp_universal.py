@@ -7,16 +7,12 @@
 
 补偿区域 (按容量排序):
   1. FFH 死代码 (mod1 短路后的不可达区域)    ~151B
-  2. mod8 enter-mission else 死分支           ~37B
-  3. mod6 validateModelAccess 注释 (3处)      ~36B
-  4. mod8 空格填充 (2处)                      ~25B
-  总计: ~249B
+  2. mod6 validateModelAccess 注释 (3处)      ~36B
+  总计: ~187B
 
 原理:
   - ffh_dead 类型: 整个死代码区域替换为 ;return{text:H,isTruncated:!1} + 注释
-  - dead_branch 类型: else EXPR → else{} + 注释填充
   - comment 类型: /* spaces */ → 调整空格数
-  - padding 类型: 空格序列 → 调整空格数
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
@@ -67,21 +63,7 @@ def find_regions(data):
                 if is_mod1 or is_compensated:
                     add('截断函数死代码', dead_start, dead_content, len(FFH_MINIMAL), 'ffh_dead')
 
-    # 2. mod8 enter-mission else 死分支
-    pat = rb'\}else ' + V + rb'\.setModel\(' + V + rb',' + V + rb'\),' + V + rb'\.setReasoningEffort\(' + V + rb'\)'
-    m = re.search(pat, data)
-    if m:
-        add('mod8-else', m.start(), m.group(0), 7, 'dead_branch')  # min: }else{}
-
-    # 3. mod8 空格填充 (两处)
-    for pat, name in [(rb'!0( +)\)\{if', 'mod8空格A'), (rb'!0( +)&&', 'mod8空格B')]:
-        for m2 in re.finditer(pat, data):
-            s = len(m2.group(1))
-            if s > 3:
-                content = data[m2.start():m2.end()]
-                add(name, m2.start(), content, len(content) - s + 1, 'padding')
-
-    # 4. mod6 注释 (3个函数) — 排除截断函数区域内的注释
+    # 2. mod6 注释 (3个函数) — 排除截断函数区域内的注释
     trunc_end = ffh + 500 if ffh >= 0 else -1
     for m3 in re.finditer(rb'/\*( +)\*/', data):
         if ffh >= 0 and ffh <= m3.start() <= trunc_end:
@@ -111,30 +93,6 @@ def resize_region(old_bytes, target_size, rtype):
         if inner < 0:
             return None
         return b'/*' + b' ' * inner + b'*/'
-
-    elif rtype == 'dead_branch':
-        base = b'}else{}'
-        if target_size < len(base):
-            return None
-        extra = target_size - len(base)
-        if extra == 0:
-            return base
-        if extra >= 4:
-            return base[:5] + b'{/*' + b' ' * (extra - 4) + b'*/}'
-        else:
-            return base[:5] + b'{' + b' ' * (extra - 1) + b'}'
-
-    elif rtype == 'padding':
-        sp_start = old_bytes.find(b'!0') + 2
-        sp_end = sp_start
-        while sp_end < len(old_bytes) and old_bytes[sp_end:sp_end + 1] == b' ':
-            sp_end += 1
-        prefix = old_bytes[:sp_start]
-        suffix = old_bytes[sp_end:]
-        new_spaces = target_size - len(prefix) - len(suffix)
-        if new_spaces < 1:
-            return None
-        return prefix + b' ' * new_spaces + suffix
 
     return None
 

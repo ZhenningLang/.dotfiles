@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""custom8: Welcome 页面橙色 + "Modified" 版本标记 (+65 bytes)
+"""mod8: Welcome 页面橙色 + "Modified" 版本标记 (+45 bytes)
 
 全部欢迎页文字 → 橙色 (hex #FFA500)
 版本号 → "vX.Y.Z Modified"
 
-+65 bytes，需要 comp_universal.py 补偿。
++45 bytes，需要 comp_universal.py 补偿。
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
@@ -17,13 +17,13 @@ data = load_droid()
 total_diff = 0
 
 if re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data):
-    print("custom8 已应用，跳过")
+    print("mod8 已应用，跳过")
     sys.exit(0)
 
 # 锚点: 版本文本 (唯一，含硬编码版本号)
 ver_m = re.search(rb'dimColor:!0,children:"(v\d+\.\d+\.\d+)"', data)
 if not ver_m:
-    print("custom8 失败: 未找到版本文本")
+    print("mod8 失败: 未找到版本文本")
     sys.exit(1)
 anchor = ver_m.start()
 ver = ver_m.group(1).decode()
@@ -81,4 +81,4 @@ for pos, old, new, name in reps:
 
 print(f"\n总计: {total_diff:+d} bytes")
 save_droid(data)
-print("custom8 完成")
+print("mod8 完成")

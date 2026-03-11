@@ -66,29 +66,24 @@ def _mod6_detect():
 
 results['mod6'] = _mod6_detect()
 
-# mod7: mission 门控
-if b'statsigName:"enable_extra_mod0",defaultValue:!0' in data:
+# mod7: 多行历史记录按↓修复
+# 修改后: V(),!0 → spaces + !1
+mod7_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
+mod7_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
+if mod7_modified:
     results['mod7'] = 'modified'
-elif b'statsigName:"enable_extra_mode",defaultValue:!1' in data:
+elif mod7_original:
     results['mod7'] = 'original'
 else:
     results['mod7'] = 'unknown'
 
-# mod8: mission 模型白名单
-def _mod8_detect():
-    has_orig1 = bool(re.search(V + rb'\.includes\(' + V + rb'\)\)\{if\(!' + V, data))
-    has_orig2 = bool(re.search(rb'if\(!\(' + V + rb'\.includes\(' + V + rb'\)&&' + V + rb'\.includes\(', data))
-    has_mod1 = bool(re.search(rb'!0\s+\)\{if\(!' + V, data))
-    has_mod2 = bool(re.search(rb'if\(!\(!0\s+&&' + V + rb'\.includes\(', data))
-    if has_mod1 and has_mod2:
-        return 'modified'
-    elif has_orig1 and has_orig2:
-        return 'original'
-    elif has_mod1 or has_mod2:
-        return 'partial'
-    return 'unknown'
-
-results['mod8'] = _mod8_detect()
+# mod8: Welcome 页面橙色 + "Modified" 标记
+if re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data):
+    results['mod8'] = 'modified'
+elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data):
+    results['mod8'] = 'original'
+else:
+    results['mod8'] = 'unknown'
 
 # mod9: custom model effort 级别
 if b'T.provider=="openai"' in data and b'["off","low","medium","high","max"]' in data:
@@ -98,26 +93,10 @@ elif b'supportedReasoningEfforts:L?["off","low","medium","high"]:["none"]' in da
 else:
     results['mod9'] = 'unknown'
 
-# custom7: 多行历史记录按↓修复
-mod7c_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
-mod7c_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
-if mod7c_modified:
-    results['custom7'] = 'modified'
-elif mod7c_original:
-    results['custom7'] = 'original'
-else:
-    results['custom7'] = 'unknown'
 
-# custom9: Option+Left/Right 修复
-if b'if((QA||bA.name)=="b")return Q(),!0;' in data and b'if((QA||bA.name)=="f")return z(),!0;' in data:
-    results['custom9'] = 'modified'
-elif b'if(QA==="b")return Q(),!0;' in data and b'if(QA==="f")return z(),!0;' in data:
-    results['custom9'] = 'original'
-else:
-    results['custom9'] = 'unknown'
 
 # 输出
-total = 11
+total = 9
 mod_count = sum(1 for v in results.values() if v == 'modified')
 orig_count = sum(1 for v in results.values() if v == 'original')
 
@@ -222,9 +201,6 @@ else:
                 ve = mission.get('validationWorkerReasoningEffort', '')
                 print(f"    Worker:    {wm} ({we})" + (" ⚠ 不在 customModels 中" if wm and wm not in model_ids else ""))
                 print(f"    Validator: {vm} ({ve})" + (" ⚠ 不在 customModels 中" if vm and vm not in model_ids else ""))
-            elif results.get('mod7') == 'modified' or results.get('mod8') == 'modified':
-                print(f"\n  ⚠ mod7/mod8 已启用但缺少 missionModelSettings")
-                print(f"    → 建议配置 workerModel / validationWorkerModel 指向 custom model")
 
             if not warnings:
                 print("\n  配置正常 ✓")
