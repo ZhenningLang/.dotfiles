@@ -34,11 +34,16 @@ elif b'command.length>50' in data:
 else:
     results['mod2'] = 'unknown'
 
-# mod3+mod5: 输出行数 (VAR=4/99,VAR2=5,VAR3=200)
-if re.search(V + rb'=99,' + V + rb'=5,' + V + rb'=200', data):
+# mod3+mod5: 输出行数
+# legacy: VAR=4/99,VAR2=5,VAR3=200
+# v0.73+: VAR=VAR2?8:4 / VAR=99||4 (near exec-preview, ternary)
+if re.search(V + rb'=99,' + V + rb'=5,' + V + rb'=200', data) or b'=99||4' in data:
     results['mod3'] = 'modified'
     results['mod5'] = 'modified'
 elif re.search(V + rb'=4,' + V + rb'=5,' + V + rb'=200', data):
+    results['mod3'] = 'original'
+    results['mod5'] = 'original'
+elif re.search(V + rb'=' + V + rb'\?8:4', data):
     results['mod3'] = 'original'
     results['mod5'] = 'original'
 else:
@@ -46,12 +51,24 @@ else:
     results['mod5'] = 'unknown'
 
 # mod4: diff行数
-if re.search(rb'var ' + V + rb'=99,' + V + rb',', data):
-    results['mod4'] = 'modified'
-elif re.search(rb'var ' + V + rb'=20,' + V + rb',', data):
-    results['mod4'] = 'original'
-else:
-    results['mod4'] = 'unknown'
+# legacy: var VAR=20,VAR2, (后跟裸变量)
+# v0.73+: var VAR=20, near "\u23BF Interrupted"
+def _mod4_detect():
+    # legacy
+    if re.search(rb'var ' + V + rb'=99,' + V + rb',', data):
+        return 'modified'
+    if re.search(rb'var ' + V + rb'=20,' + V + rb',', data):
+        return 'original'
+    # v0.73+: check near "\u23BF Interrupted"
+    anchor = data.find(b'\\u23BF Interrupted')
+    if anchor > 0:
+        region = data[max(0, anchor - 200):anchor]
+        if re.search(rb'var ' + V + rb'=99,', region):
+            return 'modified'
+        if re.search(rb'var ' + V + rb'=20,', region):
+            return 'original'
+    return 'unknown'
+results['mod4'] = _mod4_detect()
 
 # mod6: custom model cycle (容错版, 支持单/双参数签名)
 def _mod6_detect():

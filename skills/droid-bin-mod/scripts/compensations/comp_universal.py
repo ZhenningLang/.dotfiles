@@ -6,20 +6,19 @@
   bytes:  需要补偿的字节数（正数=缩减，负数=扩展）
 
 补偿区域 (按容量排序):
-  1. FFH 死代码 (mod1 短路后的不可达区域)    ~151B
+  1. FFH 死代码 (mod1 短路后的不可达区域)    ~100-151B
   2. mod6 validateModelAccess 注释 (3处)      ~36B
-  总计: ~187B
 
 原理:
-  - ffh_dead 类型: 整个死代码区域替换为 ;return{text:H,isTruncated:!1} + 注释
-  - comment 类型: /* spaces */ → 调整空格数
+  - ffh_dead: mod1 短路后的不可达代码，最小替换为 ';' (1 byte)
+  - comment: /* spaces */ → 调整空格数，最小 /**/ (4 bytes)
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
 
-# FFH 死代码最小替换 (保持 mod1 效果: isTruncated:!1 = false)
-FFH_MINIMAL = b';return{text:H,isTruncated:!1}'  # 30 bytes
+# FFH 死代码最小替换: mod1 已短路返回, 死代码不执行, ';' 即可
+FFH_MINIMAL = b';'  # 1 byte
 
 
 def find_regions(data):
@@ -33,40 +32,36 @@ def find_regions(data):
             regions.append((name, offset, content, min_size, rtype))
 
     # 1. 截断函数死代码 (mod1 短路后的不可达区域)
-    # 用 isTruncated 定位截断函数，不依赖混淆后的函数名
-    trunc_pat = re.search(rb'if\(!0\|\|!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data)
-    if not trunc_pat:
-        # 也匹配已补偿形态: ;return{text:H,isTruncated:!1} 或 /*...*/return{...}
-        trunc_pat = re.search(rb';return\{text:' + V + rb',isTruncated:!1\}', data)
-    ffh = trunc_pat.start() if trunc_pat else -1
-    if ffh != -1:
-        region = data[ffh:ffh + 500]
+    # 定位 mod1 的 early return, 死代码在其后直到第二个 return
+    trunc_pat = re.search(
+        rb'if\(!0\|\|!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data)
+    if trunc_pat:
+        region = data[trunc_pat.start():trunc_pat.start() + 500]
         s1 = region.find(b'isTruncated:!1}')
         if s1 >= 0:
-            # 找结尾: 优先找 !0} (原版/部分修改)，否则找第二个 !1} (已补偿)
+            dead_start = trunc_pat.start() + s1 + 15
+            # 结尾: 原版第二个 return 的 isTruncated:!0}
             s2 = region.find(b'isTruncated:!0}', s1 + 15)
             if s2 >= 0:
-                s2 += 15
+                dead_end = trunc_pat.start() + s2 + 15
             else:
-                s2_last = region.rfind(b'isTruncated:!1}')
-                if s2_last > s1:
-                    s2 = s2_last + 15
+                # 已补偿: 找 }var 或 }function 作为函数结束标志
+                after_dead = data[dead_start:dead_start + 300]
+                end_m = re.search(rb'\}var ', after_dead)
+                if end_m:
+                    dead_end = dead_start + end_m.start()
+                else:
+                    dead_end = None
 
-            if s2 and s2 > s1 + 15:
-                dead_start = ffh + s1 + 15
-                dead_end = ffh + s2
+            if dead_end and dead_end > dead_start + 1:
                 dead_content = data[dead_start:dead_end]
-                # 校验: 确认 mod1 已应用 (检查死代码前面的 if 条件) 或区域已被补偿
-                prefix = data[max(0, dead_start - 60):dead_start]
-                is_mod1 = b'if(!0||!' in prefix
-                is_compensated = b'/*' in dead_content and b'return{text:' in dead_content
-                if is_mod1 or is_compensated:
-                    add('截断函数死代码', dead_start, dead_content, len(FFH_MINIMAL), 'ffh_dead')
+                add('截断函数死代码', dead_start, dead_content, len(FFH_MINIMAL), 'ffh_dead')
 
     # 2. mod6 注释 (3个函数) — 排除截断函数区域内的注释
-    trunc_end = ffh + 500 if ffh >= 0 else -1
+    ffh_start = trunc_pat.start() if trunc_pat else -1
+    ffh_end = ffh_start + 500 if ffh_start >= 0 else -1
     for m3 in re.finditer(rb'/\*( +)\*/', data):
-        if ffh >= 0 and ffh <= m3.start() <= trunc_end:
+        if ffh_start >= 0 and ffh_start <= m3.start() <= ffh_end:
             continue
         s = len(m3.group(1))
         if 8 <= s <= 40:
@@ -80,13 +75,10 @@ def resize_region(old_bytes, target_size, rtype):
     if rtype == 'ffh_dead':
         if target_size < len(FFH_MINIMAL):
             return None
-        pad = target_size - len(FFH_MINIMAL)
-        if pad == 0:
-            return FFH_MINIMAL
-        if pad >= 4:
-            return b';/*' + b' ' * (pad - 4) + b'*/' + FFH_MINIMAL[1:]
-        else:
-            return b';' + b' ' * pad + FFH_MINIMAL[1:]
+        if target_size == 1:
+            return b';'
+        # ; + spaces 填充
+        return b';' + b' ' * (target_size - 1)
 
     elif rtype == 'comment':
         inner = target_size - 4
