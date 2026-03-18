@@ -56,6 +56,14 @@
       "source": "skills/shadcn-ui",
       "target": "skills/shadcn-ui",
       "commit": "ad0b5cc5d5c3569e12a3105b0dee7409c3227e1b"
+    },
+    {
+      "name": "frontend-design",
+      "repo": "anthropics/skills",
+      "ref": "main",
+      "source": "skills/frontend-design",
+      "target": "skills/frontend-design",
+      "commit": "b0cbd3df1533b396d281a6886d5132f623393a9c"
     }
   ]
 }

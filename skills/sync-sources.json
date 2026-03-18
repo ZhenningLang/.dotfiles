@@ -48,6 +48,13 @@
       "ref": "main",
       "source": "skills/shadcn-ui",
       "target": "skills/shadcn-ui"
+    },
+    {
+      "name": "frontend-design",
+      "repo": "anthropics/skills",
+      "ref": "main",
+      "source": "skills/frontend-design",
+      "target": "skills/frontend-design"
     }
   ]
 }
