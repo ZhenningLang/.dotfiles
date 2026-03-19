@@ -103,17 +103,25 @@ else:
     results['mod8'] = 'unknown'
 
 # mod9: custom model effort 级别
-if b'T.provider=="openai"' in data and b'["off","low","medium","high","max"]' in data:
+# 紧凑版: 在数组末尾追加 "max" (wUT 自动映射 openai "xhigh")
+if re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high","max"\]:\["none"\]', data):
     results['mod9'] = 'modified'
-elif b'supportedReasoningEfforts:L?["off","low","medium","high"]:["none"]' in data:
+elif re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high"\]:\["none"\]', data):
     results['mod9'] = 'original'
 else:
     results['mod9'] = 'unknown'
 
+# mod10: kitty keyboard 检测超时
+if re.search(rb'setTimeout\(\w+,999\)', data) and b'enableKittyProtocol' in data:
+    results['mod10'] = 'modified'
+elif re.search(rb'setTimeout\(\w+,200\)', data) and b'enableKittyProtocol' in data:
+    results['mod10'] = 'original'
+else:
+    results['mod10'] = 'unknown'
 
 
 # 输出
-total = 9
+total = 10
 mod_count = sum(1 for v in results.values() if v == 'modified')
 orig_count = sum(1 for v in results.values() if v == 'original')
 
