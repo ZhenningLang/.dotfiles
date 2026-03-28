@@ -19,7 +19,19 @@ USAGE_CACHE="/tmp/droid_statusline_usage"
 USAGE_STR=""
 _fetch_usage() {
   local tok tmp
-  tok=$(python3 -c "import json; print(json.loads(open('$HOME/.factory/auth.encrypted').read())['access_token'])" 2>/dev/null) || return
+  # Try auth.v2 (AES-256-GCM encrypted) first, fall back to legacy auth.encrypted
+  if [ -f "$HOME/.factory/auth.v2.file" ] && [ -f "$HOME/.factory/auth.v2.key" ]; then
+    tok=$(node -e "
+      const c=require('crypto'),f=require('fs'),p=require('path'),h=process.env.HOME;
+      const k=Buffer.from(f.readFileSync(p.join(h,'.factory/auth.v2.key'),'utf8').trim(),'base64');
+      const d=f.readFileSync(p.join(h,'.factory/auth.v2.file'),'utf8').trim().split(':');
+      const x=c.createDecipheriv('aes-256-gcm',k,Buffer.from(d[0],'base64'));
+      x.setAuthTag(Buffer.from(d[1],'base64'));
+      console.log(JSON.parse(x.update(Buffer.from(d[2],'base64'),null,'utf8')+x.final('utf8')).access_token);
+    " 2>/dev/null) || return
+  else
+    tok=$(python3 -c "import json; print(json.loads(open('$HOME/.factory/auth.encrypted').read())['access_token'])" 2>/dev/null) || return
+  fi
   tmp="${USAGE_CACHE}.tmp.$$"
   curl -s --max-time 5 --noproxy api.factory.ai "https://api.factory.ai/api/organization/subscription/schedule" \
     -H "Authorization: Bearer $tok" \
