@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""mod8: Welcome 页面橙色 + "Modified" 版本标记 (+45 bytes)
+"""mod8: Welcome/Header 页面橙色 + "Modified" 版本标记
 
-全部欢迎页文字 → 橙色 (hex #FFA500)
-版本号 → "vX.Y.Z Modified"
+修改三个目标:
+  1. rID 函数 (旧 Welcome 页面, JSX): 文字橙色 + 版本号 "Modified"
+  2. header 函数 (新 canvas header): 版本号追加 " Modified"
+  3. dim-bold 样式 (canvas style table): 颜色改为橙色 (#FFA500)
 
-+45 bytes，需要 comp_universal.py 补偿。
+路径2 产生字节增量，需要 comp_universal.py 补偿。路径3 为 0 bytes。
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
@@ -16,55 +18,72 @@ COLOR_C = COLOR + b','
 data = load_droid()
 total_diff = 0
 
-if re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data):
+# 检查是否已应用
+welcome_done = bool(re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data))
+header_done = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
+style_done = b'"dim-bold":{color:"#FFA500"' in data
+
+if welcome_done and header_done and style_done:
     print("mod8 已应用，跳过")
     sys.exit(0)
 
-# 锚点: 版本文本 (唯一，含硬编码版本号)
-ver_m = re.search(rb'dimColor:!0,children:"(v\d+\.\d+\.\d+)"', data)
-if not ver_m:
-    print("mod8 失败: 未找到版本文本")
-    sys.exit(1)
-anchor = ver_m.start()
-ver = ver_m.group(1).decode()
-
 reps = []  # (位置, 旧, 新, 名称)
 
-# 1. Logo (锚点前 ~100B): bold:!0, → bold:!0,color:"orange",
-pat = re.compile(rb'(bold:!0,)(children:' + V + rb'\},void)')
-for m in pat.finditer(data):
-    if 0 < anchor - m.start() < 300:
-        reps.append((m.start(), m.group(0),
-                      m.group(1) + COLOR_C + m.group(2), "Logo"))
-        break
+# === 路径1: rID 函数 (旧 Welcome 页面) ===
+if not welcome_done:
+    ver_m = re.search(rb'dimColor:!0,children:"(v\d+\.\d+\.\d+)"', data)
+    if not ver_m:
+        print("警告: 未找到 rID 版本文本 (dimColor)，可能已被移除")
+    else:
+        anchor = ver_m.start()
+        ver = ver_m.group(1).decode()
 
-# 2. 版本: dimColor:!0 → color:"orange", 加 " Modified"
-old_v = ver_m.group(0)
-new_v = COLOR_C + f'children:"{ver} Modified"'.encode()
-reps.append((anchor, old_v, new_v, "版本"))
+        # 1a. Logo: bold:!0, → bold:!0,color:"orange",
+        pat = re.compile(rb'(bold:!0,)(children:' + V + rb'\},void)')
+        for m in pat.finditer(data):
+            if 0 < anchor - m.start() < 300:
+                reps.append((m.start(), m.group(0),
+                              m.group(1) + COLOR_C + m.group(2), "Welcome Logo"))
+                break
 
-# 3. 标语 (锚点后 ~160B): italic:!0, → italic:!0,color:"orange",
-pat = re.compile(rb'(italic:!0,)(children:' + V + rb')')
-for m in pat.finditer(data):
-    if 0 < m.start() - anchor < 500:
-        reps.append((m.start(), m.group(0),
-                      m.group(1) + COLOR_C + m.group(2), "标语"))
-        break
+        # 1b. 版本: dimColor:!0 → color:"orange", + " Modified"
+        old_v = ver_m.group(0)
+        new_v = COLOR_C + f'children:"{ver} Modified"'.encode()
+        reps.append((anchor, old_v, new_v, "Welcome 版本"))
 
-# 4. 操作提示 (锚点后 ~290B): {children:VAR} → {color:"orange",children:VAR}
-pat = re.compile(rb'\.jsxDEV\(' + V + rb',\{(children:' + V + rb')\},void')
-for m in pat.finditer(data):
-    if 200 < m.start() - anchor < 800:
-        old = m.group(0)
-        new = old.replace(b'{' + m.group(1), b'{' + COLOR_C + m.group(1), 1)
-        reps.append((m.start(), old, new, "提示"))
-        break
+        # 1c. 标语: italic:!0, → italic:!0,color:"orange",
+        pat = re.compile(rb'(italic:!0,)(children:' + V + rb')')
+        for m in pat.finditer(data):
+            if 0 < m.start() - anchor < 500:
+                reps.append((m.start(), m.group(0),
+                              m.group(1) + COLOR_C + m.group(2), "Welcome 标语"))
+                break
 
-# 5. 文件夹 (锚点后 ~440B): dimColor:!0 → color:"orange"
-pat = re.compile(rb'(dimColor:!0)(,children:\["Current folder: ")')
-m = pat.search(data)
-if m and 0 < m.start() - anchor < 1000:
-    reps.append((m.start(), m.group(0), COLOR + m.group(2), "文件夹"))
+# === 路径2: header 函数 (新 canvas header) ===
+if not header_done:
+    hdr_m = re.search(rb'V\("(v\d+\.\d+\.\d+)"\),"(v\d+\.\d+\.\d+)","dim-bold"\)', data)
+    if not hdr_m:
+        print("警告: 未找到 header 版本文本")
+    else:
+        ver = hdr_m.group(1).decode()
+        old = hdr_m.group(0)
+        new = f'V("{ver} Modified"),"{ver} Modified","dim-bold")'.encode()
+        reps.append((hdr_m.start(), old, new, "Header 版本"))
+
+# === 路径3: dim-bold 样式颜色 → 橙色 (0 bytes) ===
+if not style_done:
+    # UH.text.secondary (17B) → "#FFA500"/*    */ (17B), 0 bytes 变化
+    style_old = b'"dim-bold":{color:UH.text.secondary,'
+    style_new = b'"dim-bold":{color:"#FFA500"/*    */,'
+    if style_old in data:
+        pos = data.find(style_old)
+        reps.append((pos, style_old, style_new, "dim-bold 样式"))
+    else:
+        print("警告: 未找到 dim-bold 样式定义")
+
+if not reps:
+    print("mod8 失败: 没有找到任何可修改的目标")
+    sys.exit(1)
 
 # 从高位到低位替换，避免偏移影响
 reps.sort(key=lambda x: x[0], reverse=True)

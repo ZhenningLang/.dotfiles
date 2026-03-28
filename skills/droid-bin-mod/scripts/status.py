@@ -26,48 +26,15 @@ elif re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)return\{text:' + V + rb',isTru
 else:
     results['mod1'] = 'unknown'
 
-# mod2: 命令阈值
-if b'command.length>99' in data:
-    results['mod2'] = 'modified'
-elif b'command.length>50' in data:
-    results['mod2'] = 'original'
-else:
-    results['mod2'] = 'unknown'
-
-# mod3+mod5: 输出行数
-# legacy: VAR=4/99,VAR2=5,VAR3=200
-# v0.73+: VAR=VAR2?8:4 / VAR=99||4 (near exec-preview, ternary)
-if re.search(V + rb'=99,' + V + rb'=5,' + V + rb'=200', data) or b'=99||4' in data:
-    results['mod3'] = 'modified'
-    results['mod5'] = 'modified'
-elif re.search(V + rb'=4,' + V + rb'=5,' + V + rb'=200', data):
-    results['mod3'] = 'original'
-    results['mod5'] = 'original'
-elif re.search(V + rb'=' + V + rb'\?8:4', data):
-    results['mod3'] = 'original'
-    results['mod5'] = 'original'
-else:
-    results['mod3'] = 'unknown'
-    results['mod5'] = 'unknown'
-
-# mod4: diff行数
-# legacy: var VAR=20,VAR2, (后跟裸变量)
-# v0.73+: var VAR=20, near "\u23BF Interrupted"
+# mod4: diff行数 — var VAR=(20|99),VAR=2000 (iTT 函数参数)
 def _mod4_detect():
-    # legacy
-    if re.search(rb'var ' + V + rb'=99,' + V + rb',', data):
-        return 'modified'
-    if re.search(rb'var ' + V + rb'=20,' + V + rb',', data):
-        return 'original'
-    # v0.73+: check near "\u23BF Interrupted"
-    anchor = data.find(b'\\u23BF Interrupted')
-    if anchor > 0:
-        region = data[max(0, anchor - 200):anchor]
-        if re.search(rb'var ' + V + rb'=99,', region):
-            return 'modified'
-        if re.search(rb'var ' + V + rb'=20,', region):
-            return 'original'
-    return 'unknown'
+    matches = list(re.finditer(rb'var ' + V + rb'=(20|99),' + V + rb'=2000', data))
+    if not matches:
+        return 'unknown'
+    if len(matches) > 1:
+        return 'unknown'
+    val = int(matches[0].group(1))
+    return 'modified' if val == 99 else 'original'
 results['mod4'] = _mod4_detect()
 
 # mod6: custom model cycle (容错版, 支持单/双参数签名)
@@ -94,10 +61,16 @@ elif mod7_original:
 else:
     results['mod7'] = 'unknown'
 
-# mod8: Welcome 页面橙色 + "Modified" 标记
-if re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data):
+# mod8: Welcome/Header 橙色 + "Modified" 标记 (三个目标)
+welcome_mod = bool(re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data))
+header_mod = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
+style_mod = b'"dim-bold":{color:"#FFA500"' in data
+all_targets = [welcome_mod, header_mod, style_mod]
+if all(all_targets):
     results['mod8'] = 'modified'
-elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data):
+elif any(all_targets):
+    results['mod8'] = 'partial'
+elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb'V\("v\d+\.\d+\.\d+"\),"v\d+\.\d+\.\d+","dim-bold"', data):
     results['mod8'] = 'original'
 else:
     results['mod8'] = 'unknown'
@@ -121,16 +94,15 @@ else:
 
 
 # 输出
-total = 10
+total = len(results)
 mod_count = sum(1 for v in results.values() if v == 'modified')
 orig_count = sum(1 for v in results.values() if v == 'original')
 
 print(f"droid 状态:\n")
 for name, status in results.items():
-    icon = '✓' if status == 'modified' else '○' if status == 'original' else '?'
-    label = {'modified': '已修改', 'original': '原版', 'unknown': '未知'}[status]
-    note = ' (由 mod3 控制)' if name == 'mod5' else ''
-    print(f"  {icon} {name}: {label}{note}")
+    icon = '✓' if status == 'modified' else '△' if status == 'partial' else '○' if status == 'original' else '?'
+    label = {'modified': '已修改', 'original': '原版', 'unknown': '未知', 'partial': '部分修改'}[status]
+    print(f"  {icon} {name}: {label}")
 
 print()
 if mod_count == total:
