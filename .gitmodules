@@ -1,0 +1,69 @@
+[submodule "refs/affaan-m/everything-claude-code"]
+	path = refs/affaan-m/everything-claude-code
+	url = https://github.com/affaan-m/everything-claude-code.git
+[submodule "refs/anthropics/skills"]
+	path = refs/anthropics/skills
+	url = https://github.com/anthropics/skills
+[submodule "refs/automazeio/ccpm"]
+	path = refs/automazeio/ccpm
+	url = https://github.com/automazeio/ccpm.git
+[submodule "refs/Dimillian/Skills"]
+	path = refs/Dimillian/Skills
+	url = https://github.com/Dimillian/Skills
+[submodule "refs/glittercowboy/taches-cc-resources"]
+	path = refs/glittercowboy/taches-cc-resources
+	url = https://github.com/glittercowboy/taches-cc-resources
+[submodule "refs/google-labs-code/stitch-skills"]
+	path = refs/google-labs-code/stitch-skills
+	url = https://github.com/google-labs-code/stitch-skills
+[submodule "refs/gsd-build/get-shit-done"]
+	path = refs/gsd-build/get-shit-done
+	url = https://github.com/gsd-build/get-shit-done.git
+[submodule "refs/libukai/awesome-agent-Skills"]
+	path = refs/libukai/awesome-agent-Skills
+	url = https://github.com/libukai/awesome-agent-Skills.git
+[submodule "refs/millionco/react-doctor"]
+	path = refs/millionco/react-doctor
+	url = https://github.com/millionco/react-doctor
+[submodule "refs/mksglu/context-mode"]
+	path = refs/mksglu/context-mode
+	url = https://github.com/mksglu/context-mode
+[submodule "refs/muratcankoylan/Agent-Skills-for-Context-Engineering"]
+	path = refs/muratcankoylan/Agent-Skills-for-Context-Engineering
+	url = https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering.git
+[submodule "refs/nextlevelbuilder/ui-ux-pro-max-skill"]
+	path = refs/nextlevelbuilder/ui-ux-pro-max-skill
+	url = https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git
+[submodule "refs/notdp/hive"]
+	path = refs/notdp/hive
+	url = https://github.com/notdp/hive
+[submodule "refs/nyldn/claude-octopus"]
+	path = refs/nyldn/claude-octopus
+	url = https://github.com/nyldn/claude-octopus.git
+[submodule "refs/obra/superpowers"]
+	path = refs/obra/superpowers
+	url = https://github.com/obra/superpowers.git
+[submodule "refs/pbakaus/impeccable"]
+	path = refs/pbakaus/impeccable
+	url = https://github.com/pbakaus/impeccable.git
+[submodule "refs/tanweai/pua"]
+	path = refs/tanweai/pua
+	url = https://github.com/tanweai/pua
+[submodule "refs/travisvn/awesome-claude-Skills"]
+	path = refs/travisvn/awesome-claude-Skills
+	url = https://github.com/travisvn/awesome-claude-Skills.git
+[submodule "refs/vercel-labs/agent-browser"]
+	path = refs/vercel-labs/agent-browser
+	url = https://github.com/vercel-labs/agent-browser
+[submodule "refs/vercel-labs/agent-skills"]
+	path = refs/vercel-labs/agent-skills
+	url = https://github.com/vercel-labs/agent-skills
+[submodule "refs/vercel-labs/skills"]
+	path = refs/vercel-labs/skills
+	url = https://github.com/vercel-labs/skills
+[submodule "refs/Yeachan-Heo/oh-my-claudecode"]
+	path = refs/Yeachan-Heo/oh-my-claudecode
+	url = https://github.com/Yeachan-Heo/oh-my-claudecode
+[submodule "refs/ChromeDevTools/chrome-devtools-mcp"]
+	path = refs/ChromeDevTools/chrome-devtools-mcp
+	url = https://github.com/ChromeDevTools/chrome-devtools-mcp
