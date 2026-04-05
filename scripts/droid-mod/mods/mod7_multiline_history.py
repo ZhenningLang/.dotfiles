@@ -6,11 +6,17 @@
 修复: 将 V(),!0 替换为等长 (spaces)!1，使 _T 返回 false，让外层处理。
 """
 import sys
+import re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, replace_one, V
 
 data = load_droid()
 original_size = len(data)
+
+modified_pat = rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1'
+if re.search(modified_pat, data):
+    print("mod7 已应用，跳过")
+    sys.exit(0)
 
 # Pattern: ),!0}if(V)return V(),!0}return!1
 # Replace:                  ^^^^^ → spaces + !1

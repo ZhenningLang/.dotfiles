@@ -67,3 +67,6 @@
 [submodule "refs/ChromeDevTools/chrome-devtools-mcp"]
 	path = refs/ChromeDevTools/chrome-devtools-mcp
 	url = https://github.com/ChromeDevTools/chrome-devtools-mcp
+[submodule "refs/notdp/.dotfiles"]
+	path = refs/notdp/.dotfiles
+	url = https://github.com/notdp/.dotfiles

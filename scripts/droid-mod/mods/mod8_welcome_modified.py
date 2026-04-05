@@ -60,41 +60,56 @@ if not welcome_done:
                 break
 
 # === 路径2: header 函数 (新 canvas header) ===
-# 兼容两种结构:
-#   v0.89.0: Ib(E,j,V("vX.Y.Z"),"vX.Y.Z","dim-bold")          — 紧凑式
-#   v0.90.0: let wH=V("vX.Y.Z");...Ib(E,j,wH,"vX.Y.Z","dim-bold")...WI("vX.Y.Z")  — 拆分式
+# v0.94+ 有 if/else 两个分支都显示版本号，需要全部替换
 if not header_done:
     VER = rb'v\d+\.\d+\.\d+'
-    # 尝试旧模式 (紧凑式)
-    hdr_m = re.search(rb'V\("(' + VER + rb')"\),"(' + VER + rb')","dim-bold"\)', data)
-    if hdr_m:
-        ver = hdr_m.group(1).decode()
-        old = hdr_m.group(0)
-        new = f'V("{ver} Modified"),"{ver} Modified","dim-bold")'.encode()
-        reps.append((hdr_m.start(), old, new, "Header 版本"))
-    else:
-        # 新模式 (拆分式): 只替换 Ib() 显示文本 (+9B)
-        # 跳过 V() 和 WI() 以节省补偿空间（仅影响居中，可接受）
-        anchor = re.search(rb'"(' + VER + rb')","dim-bold"\)', data)
-        if not anchor:
-            print("警告: 未找到 header 版本文本")
-        else:
-            ver = anchor.group(1).decode()
-            pat_dim = f',"{ver}","dim-bold")'.encode()
-            idx = data.find(pat_dim, anchor.start() - 30)
-            if idx >= 0:
-                reps.append((idx, pat_dim, f',"{ver} Modified","dim-bold")'.encode(), "Header Ib()"))
+    # 找所有 "vX.Y.Z","dim-bold") — 替换为 "vX.Y.Z Modified","dim-bold")
+    hdr_pat = re.compile(rb'"(' + VER + rb')","dim-bold"\)')
+    for m in hdr_pat.finditer(data):
+        ver = m.group(1).decode()
+        old = m.group(0)
+        new = f'"{ver} Modified","dim-bold")'.encode()
+        reps.append((m.start(), old, new, f"Header 版本 @{m.start()}"))
+    # 同时替换 V("vX.Y.Z") 中的字符串（居中计算用）
+    vfn_pat = re.compile(rb'V\("(' + VER + rb')"\)')
+    for m in vfn_pat.finditer(data):
+        ver = m.group(1).decode()
+        old = m.group(0)
+        new = f'V("{ver} Modified")'.encode()
+        reps.append((m.start(), old, new, f"Header V() @{m.start()}"))
+    if not any("Header" in r[3] for r in reps):
+        print("警告: 未找到 header 版本文本")
 
 # === 路径3: dim-bold 样式颜色 → 橙色 (0 bytes) ===
 if not style_done:
-    # UH.text.secondary (17B) → "#FFA500"/*    */ (17B), 0 bytes 变化
-    style_old = b'"dim-bold":{color:UH.text.secondary,'
-    style_new = b'"dim-bold":{color:"#FFA500"/*    */,'
-    if style_old in data:
-        pos = data.find(style_old)
+    style_pat = re.compile(rb'"dim-bold":\{color:(' + V + rb')\.text\.secondary,')
+    style_m = style_pat.search(data)
+    if style_m:
+        var_name = style_m.group(1)
+        old_val = var_name + b'.text.secondary'
+        new_val = b'"#FFA500"' + b'/' + b'*' + b' ' * (len(old_val) - 13) + b'*' + b'/'
+        if len(new_val) != len(old_val):
+            new_val = b'"#FFA500"' + b' ' * (len(old_val) - 9)
+        style_old = b'"dim-bold":{color:' + old_val + b','
+        style_new = b'"dim-bold":{color:' + new_val + b','
+        pos = style_m.start()
         reps.append((pos, style_old, style_new, "dim-bold 样式"))
     else:
         print("警告: 未找到 dim-bold 样式定义")
+
+# === 路径4: logo 样式颜色 → 橙色 (0 bytes) ===
+logo_done = b'logo:{color:"#FFA500"' in data
+if not logo_done:
+    logo_pat = re.compile(rb'logo:\{color:(' + V + rb'\.headerLogo),')
+    logo_m = logo_pat.search(data)
+    if logo_m:
+        old_val = logo_m.group(1)
+        new_val = b'"#FFA500"' + b' ' * (len(old_val) - 9)
+        logo_old = b'logo:{color:' + old_val + b','
+        logo_new = b'logo:{color:' + new_val + b','
+        reps.append((logo_m.start(), logo_old, logo_new, "logo 样式"))
+    else:
+        print("警告: 未找到 logo 样式定义")
 
 if not reps:
     print("mod8 失败: 没有找到任何可修改的目标")

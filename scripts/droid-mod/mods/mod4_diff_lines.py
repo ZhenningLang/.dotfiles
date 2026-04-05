@@ -1,40 +1,58 @@
 #!/usr/bin/env python3
-"""mod4: Edit diff/输出截断行数 20→99 (0 bytes)
+"""mod4: Edit diff/输出截断行数 → 99 (0 bytes)
 
-目标: iTT() 函数的默认行数参数
-  function iTT(H, T=VAR1, R=VAR2) { ... if(A.length>T) D=A.slice(0,T) ... }
-  var VAR1=20, VAR2=2000
+两个截断路径:
+  1. gBT 文本截断: var VAR=20,VAR=2000 (旧版，v0.93 及以前)
+  2. bRD viewport tier 截断: bRD={xs:N,sm:N,md:N,lg:N} (v0.94+)
 
-锚点: var VAR=20,VAR=2000 (值 20+2000 组合定位，不受混淆影响)
+两个都尝试修改，适配新旧版本。
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
 
 data = load_droid()
+changed = False
 
-pat = rb'var (' + V + rb')=(20|99),(' + V + rb')=2000'
-matches = list(re.finditer(pat, data))
+# === 路径1: gBT 文本截断 var VAR=20,VAR=2000 ===
+pat1 = rb'var (' + V + rb')=(20|99),(' + V + rb')=2000'
+matches1 = list(re.finditer(pat1, data))
+if len(matches1) == 1:
+    m = matches1[0]
+    if int(m.group(2)) == 20:
+        old = m.group(0)
+        new = b'var ' + m.group(1) + b'=99,' + m.group(3) + b'=2000'
+        data = data[:m.start()] + new + data[m.start() + len(old):]
+        print(f"gBT 文本截断: {m.group(1).decode()}=20 → 99 (+0 bytes)")
+        changed = True
+    else:
+        print("gBT 文本截断: 已是 99，跳过")
+elif not matches1:
+    print("gBT 文本截断: 未找到（可能已移除），跳过")
+else:
+    print(f"gBT 文本截断: 找到 {len(matches1)} 处，跳过")
 
-if not matches:
-    print("mod4 失败: 未找到 var VAR=20,VAR=2000 模式")
-    sys.exit(1)
+# === 路径2: bRD viewport tier 截断 ===
+pat2 = re.compile(rb'bRD=\{xs:(\d+),sm:(\d+),md:(\d+),lg:(\d+)\}')
+m2 = pat2.search(data)
+if m2:
+    md_val, lg_val = int(m2.group(3)), int(m2.group(4))
+    if md_val < 99 or lg_val < 99:
+        old = m2.group(0)
+        new = (b'bRD={xs:' + m2.group(1) + b',sm:' + m2.group(2) +
+               b',md:99,lg:99}')
+        assert len(new) == len(old), f"长度不匹配: {len(old)} vs {len(new)}"
+        data = data[:m2.start()] + new + data[m2.start() + len(old):]
+        print(f"bRD viewport: md:{md_val}→99, lg:{lg_val}→99 (+0 bytes)")
+        changed = True
+    else:
+        print("bRD viewport: 已是 99，跳过")
+else:
+    print("bRD viewport: 未找到，跳过")
 
-if len(matches) > 1:
-    print(f"mod4 失败: 找到 {len(matches)} 处匹配，无法确定")
-    sys.exit(1)
-
-m = matches[0]
-var_name = m.group(1)
-current_val = int(m.group(2))
-
-if current_val == 99:
+if not changed:
     print("mod4 已应用，跳过")
     sys.exit(0)
 
-old = m.group(0)
-new = b'var ' + var_name + b'=99,' + m.group(3) + b'=2000'
-data = data[:m.start()] + new + data[m.start() + len(old):]
 save_droid(data)
-print(f"mod4 diff行数: {var_name.decode()}=20 → {var_name.decode()}=99 (+0 bytes)")
 print("mod4 完成")

@@ -26,22 +26,44 @@ elif re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)return\{text:' + V + rb',isTru
 else:
     results['mod1'] = 'unknown'
 
-# mod4: diff行数 — var VAR=(20|99),VAR=2000 (iTT 函数参数)
+# mod4: diff行数 — 两个截断路径
 def _mod4_detect():
-    matches = list(re.finditer(rb'var ' + V + rb'=(20|99),' + V + rb'=2000', data))
-    if not matches:
+    # 路径1: gBT 文本截断 var VAR=(20|99),VAR=2000
+    gbt_matches = list(re.finditer(rb'var ' + V + rb'=(20|99),' + V + rb'=2000', data))
+    gbt = None
+    if len(gbt_matches) == 1:
+        gbt = 'modified' if int(gbt_matches[0].group(1)) == 99 else 'original'
+    # 路径2: bRD viewport tier
+    brd_m = re.search(rb'bRD=\{xs:\d+,sm:\d+,md:(\d+),lg:(\d+)\}', data)
+    brd = None
+    if brd_m:
+        brd = 'modified' if int(brd_m.group(1)) >= 99 and int(brd_m.group(2)) >= 99 else 'original'
+    # 只要有一个路径存在且已修改就算 modified
+    states = [s for s in [gbt, brd] if s is not None]
+    if not states:
         return 'unknown'
-    if len(matches) > 1:
-        return 'unknown'
-    val = int(matches[0].group(1))
-    return 'modified' if val == 99 else 'original'
+    if all(s == 'modified' for s in states):
+        return 'modified'
+    if any(s == 'modified' for s in states):
+        return 'partial'
+    return 'original'
 results['mod4'] = _mod4_detect()
 
-# mod6: custom model cycle (容错版, 支持单/双参数签名)
+# mod6: Ctrl+N custom model direct cycle (v0.94+ Pz 回调)
 def _mod6_detect():
-    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel', b'peekNextCycleSpecModeModel']:
-        for m in re.finditer(fn_name + rb'\(' + V + rb'(?:,' + V + rb')?\)\{', data):
-            region = data[m.start():m.start() + 800]
+    # 新版: Pz 回调直接 cycle custom models
+    if b'NR().getCustomModels().map(m=>m.id)' in data and (
+            b'K_(n);wh({modelId:n})' in data or b'K_(M[' in data or b'yT().setModel(M[' in data):
+        return 'modified'
+    # 新版原版: Pz 回调弹出 selector
+    if b'S9((eA)=>!eA)},[D0])' in data or re.search(
+            rb'\w+\(\(\w+\)=>!\w+\)\},\[\w+\]\)', data):
+        return 'original'
+    # 旧版 mod: cycleModel 中注入 customModels
+    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel']:
+        pos = data.find(fn_name + b'(')
+        if pos >= 0:
+            region = data[pos:pos + 800]
             if b'=this.customModels.map(m=>m.id)' in region:
                 return 'modified'
             if b'validateModelAccess(' in region:
@@ -61,16 +83,19 @@ elif mod7_original:
 else:
     results['mod7'] = 'unknown'
 
-# mod8: Welcome/Header 橙色 + "Modified" 标记 (三个目标)
+# mod8: Welcome/Header 橙色 + "Modified" 标记
 welcome_mod = bool(re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data))
 header_mod = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
 style_mod = b'"dim-bold":{color:"#FFA500"' in data
-all_targets = [welcome_mod, header_mod, style_mod]
-if all(all_targets):
+logo_mod = b'logo:{color:"#FFA500"' in data
+# else 分支也需要改 — 检查是否还有未改的版本号
+header_orig_remain = bool(re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data))
+all_targets = [header_mod, style_mod, logo_mod]
+if all(all_targets) and not header_orig_remain:
     results['mod8'] = 'modified'
 elif any(all_targets):
     results['mod8'] = 'partial'
-elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb'V\("v\d+\.\d+\.\d+"\),"v\d+\.\d+\.\d+","dim-bold"', data) or re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data):
+elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data):
     results['mod8'] = 'original'
 else:
     results['mod8'] = 'unknown'
