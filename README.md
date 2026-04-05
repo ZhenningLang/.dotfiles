@@ -14,7 +14,7 @@ My Droid skills/scripts
 
 ### 目录结构
 
-```
+```text
 refs/
 ├── {owner}/
 │   └── {repo}/          # git submodule → github.com/{owner}/{repo}

@@ -20,22 +20,27 @@ argument-hint: <status | apply | apply 1,4,8 | restore>
 
 ## 执行方式
 
+脚本目录通过当前命令文件位置推算: `$(dirname $THIS_COMMAND)/../scripts/droid-mod/`，
+即 `~/.dotfiles/scripts/droid-mod/`。
+
 根据 `$ARGUMENTS` 决定子命令，默认为 `status`。
 
 ```bash
+SCRIPT_DIR="$(cd "$(dirname "$0")/../scripts/droid-mod" 2>/dev/null && pwd || echo "$HOME/.dotfiles/scripts/droid-mod")"
+
 # status
-python3 scripts/droid-mod/status.py
+python3 "$SCRIPT_DIR/status.py"
 
 # apply (全部)
-python3 scripts/droid-mod/apply.py
+python3 "$SCRIPT_DIR/apply.py"
 
 # apply (指定 mod)
-python3 scripts/droid-mod/apply.py 1,4,8
+python3 "$SCRIPT_DIR/apply.py" 1,4,8
 
 # restore
-python3 scripts/droid-mod/restore.py
-python3 scripts/droid-mod/restore.py 0.90.0
-python3 scripts/droid-mod/restore.py --list
+python3 "$SCRIPT_DIR/restore.py"
+python3 "$SCRIPT_DIR/restore.py" 0.90.0
+python3 "$SCRIPT_DIR/restore.py" --list
 ```
 
 ## 可用 mod
