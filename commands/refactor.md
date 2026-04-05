@@ -17,6 +17,7 @@ argument-hint: <branch|uncommitted|文件/目录/符号，留空则询问>
 ## 2. 分析
 
 对 scope 内每个文件：
+
 - 读代码，理解职责和调用关系
 - Grep/Glob 搜索所有引用点（不凭记忆）
 - 检查测试覆盖：关键路径无测试则先补
