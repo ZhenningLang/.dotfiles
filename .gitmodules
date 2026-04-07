@@ -70,3 +70,6 @@
 [submodule "refs/notdp/.dotfiles"]
 	path = refs/notdp/.dotfiles
 	url = https://github.com/notdp/.dotfiles
+[submodule "refs/addyosmani/web-quality-skills"]
+	path = refs/addyosmani/web-quality-skills
+	url = https://github.com/addyosmani/web-quality-skills
