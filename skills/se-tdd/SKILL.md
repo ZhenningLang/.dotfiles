@@ -1,5 +1,5 @@
 ---
-name: tdd
+name: se-tdd
 description: TDD 工作流。适用于新功能开发、bug 修复、行为变更；用户明确说不要 TDD 时跳过。
 ---
 
@@ -38,3 +38,8 @@ REFACTOR → 消除重复、改名、提取（保持绿灯）
 - 一个测试一个概念
 - Mock 只在外部边界使用（fs/http/db），不 mock 内部纯函数
 - 提交模式：`test(scope): failing test` → `feat(scope): implement`
+
+## 关联技能
+
+- TDD 完成后 → `/se-verify` 最终验证
+- 连续失败 2 次 → `/se-unstuck`

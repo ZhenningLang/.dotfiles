@@ -72,3 +72,9 @@ Ready to merge? Yes / No / With fixes
 - 不验证就实施 reviewer 建议
 - 模糊反馈（"这里可以优化"没有 file:line 和具体建议）
 - 没有裁决的审查（必须给出 Ready to merge? 结论）
+
+## 关联技能
+
+- Critical issues 涉及安全 → `/se-secure` 深入审查
+- 发现需要重构 → `/se-refactor`
+- Review 通过后交付 → `/se-ship`

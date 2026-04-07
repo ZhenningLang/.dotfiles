@@ -21,11 +21,26 @@ My Droid skills/scripts
 | `se-ship` | 交付（PR 模式或直接发布模式） |
 | `se-research` | 实现前技术调研（选型、最佳实践、风险） |
 | `se-secure` | 安全审查（STRIDE 威胁建模） |
-| `tdd` | TDD 工作流；可手动 `/tdd`，也可由 agent 在相关任务中调用 |
-| `verify` | 完成前验证；用于要求验证证据 |
-| `pua` | 结构化排查模式；连续失败 2 次、卡壳时触发 |
-| `frontend-design` | 前端设计约束；做前端时自动加载，提供设计原则和 AI 反模式约束 |
+| `se-tdd` | TDD 工作流；新功能/bug 修复时使用 |
+| `se-verify` | 完成前验证；要求提供验证证据 |
+| `se-unstuck` | 结构化排查；连续失败 2 次、卡壳时触发 |
+| `frontend-design` | 前端设计约束；做前端时自动加载 |
 | `react-doctor` | React 代码健康检查；React 项目中自动运行 |
+
+### 技能串联
+
+```
+se-research ─→ se-plan ─→ se-tdd ─→ se-verify ─→ se-ship
+                             │                       │
+                             ↓                       ↓
+                         se-refactor            se-review
+                             │
+                             ↓
+                         se-verify
+
+se-debug ─→ se-verify        （任何 skill 卡住时）→ se-unstuck
+se-secure ─→ se-debug/se-tdd
+```
 
 ## 工程流程 Skills 设计
 
@@ -41,7 +56,7 @@ My Droid skills/scripts
 将工程流程拆为独立 Skill（`se-` 前缀），用户按需 `/se-*` 触发，不污染 idle context：
 
 - **AGENTS.md 保持权威** — 全局准则不受干扰
-- **用户控制粒度** — 快速修复直接改，严谨开发时 `/se-plan` → `/tdd`
+- **用户控制粒度** — 快速修复直接改，严谨开发时 `/se-plan` → `/se-tdd`
 - **零 idle 开销** — Skill 仅在触发时加载（agent 也可主动调用）
 
 调研文档：`docs/software-engineering-research/`

@@ -78,3 +78,10 @@ description: 系统化调试（科学方法，子 agent 隔离分析）。用户
 - 不复现就修
 - 修复中夹带重构
 - "改了好几处但不确定哪个修好了" → 停下来，回退，逐个验证
+
+## 关联技能
+
+- 修复完成后 → `/se-verify` 验证修复有效且无回归
+- 需要大范围探索代码 → 派发 researcher/worker subagent
+- 修复后如需重构 → `/se-refactor`
+- 连续失败 2 次 → `/se-unstuck`
