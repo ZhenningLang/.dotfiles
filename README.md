@@ -16,6 +16,7 @@ My Droid skills/scripts
 | `/se-ship` | 交付（测试→review→push→PR） |
 | `/se-research` | 实现前技术调研（选型、最佳实践、风险） |
 | `/se-secure` | 安全审查（STRIDE 威胁建模） |
+| `/fe-audit` | 前端设计质量审计（设计原则 + 反模式 + 可访问性 + 代码健康） |
 
 ## Skills
 
@@ -23,6 +24,8 @@ My Droid skills/scripts
 |-------|-------------|
 | `tdd` | TDD 工作流 skill；可手动 `/tdd`，也可由 agent 在相关任务中调用 |
 | `verify` | 完成前验证 skill；用于要求验证证据，不代表仓库已配置强制 hook |
+| `pua` | 结构化排查模式；连续失败 2 次、卡壳时触发，提供压力升级和方法论切换 |
+| `frontend-design` | 前端设计约束；做前端时自动加载，提供设计原则和 AI 反模式约束 |
 
 ## 工程流程 Commands 设计
 
