@@ -64,6 +64,9 @@ argument-hint: <branch|uncommitted|文件/目录/符号，留空则询问>
 | 文件太长，职责混杂 | 拆分文件，保持 barrel export |
 | 嵌套太深 | early return / guard clause |
 | 函数只有一个调用点且无复用价值 | 内联消除 |
+| 多余注释（复述代码、与代码不一致） | 删除或改写 |
+| 冗余防御性代码（不可能触发的 try/catch） | 移除，保留必要的 |
+| 死代码（未使用的 import/变量/函数） | 删除 |
 
 ### 每步自检
 
