@@ -1,6 +1,6 @@
 ---
 description: 交付（PR 模式或直接发布模式）
-argument-hint: <--pr|--publish> [目标分支] [--skip-review]
+argument-hint: <pr|publish> [目标分支] [skip-review]
 ---
 
 # Ship
@@ -18,15 +18,15 @@ argument-hint: <--pr|--publish> [目标分支] [--skip-review]
 
 解析 `$ARGUMENTS`：
 
-- `--pr` → PR 模式（创建 Pull Request）
-- `--publish` → 直接发布模式（推送 main + 发布）
-- `--skip-review` → 跳过自动 review
+- `pr` → PR 模式（创建 Pull Request）
+- `publish` → 直接发布模式（推送 main + 发布）
+- `skip-review` → 跳过自动 review
 - 位置参数作为目标分支（留空则使用仓库默认分支）
-- **未指定 `--pr` 或 `--publish` → 询问用户选择模式**
+- **未指定 `pr` 或 `publish` → 询问用户选择模式**
 
 ## 3. Review（可跳过）
 
-除非 `--skip-review`，否则自动执行一次 simple review：
+除非 `skip-review`，否则自动执行一次 simple review：
 
 - 审查未提交或已提交但未推送的变更
 - Critical issues → 阻断交付，要求修复
@@ -34,7 +34,7 @@ argument-hint: <--pr|--publish> [目标分支] [--skip-review]
 
 ---
 
-## 模式 A：PR 模式（`--pr`）
+## 模式 A：PR 模式（`pr`）
 
 ### A1. 提交与推送
 
@@ -67,7 +67,7 @@ argument-hint: <--pr|--publish> [目标分支] [--skip-review]
 
 ---
 
-## 模式 B：直接发布模式（`--publish`）
+## 模式 B：直接发布模式（`publish`）
 
 ### B1. 安全检查
 
