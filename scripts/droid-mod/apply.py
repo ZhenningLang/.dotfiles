@@ -3,7 +3,7 @@
 
 用法:
     python3 apply.py              # 应用全部未修改的 mod
-    python3 apply.py 1,4,8       # 只应用指定 mod
+    python3 apply.py mod-hide-command-truncation,mod-extend-kitty-timeout
     python3 apply.py status      # 仅显示状态
     python3 apply.py restore     # 恢复备份
 """
@@ -14,15 +14,51 @@ DROID = Path.home() / '.local/bin/droid'
 DIR = Path(__file__).parent
 
 MODS = [
-    (1,  'mod1_truncate_condition',   '命令截断条件短路'),
-    (4,  'mod4_diff_lines',           'diff 行数 20→99'),
-    (6,  'mod6_custom_model_cycle',   'Ctrl+N 跳过 Copilot'),
-    (7,  'mod7_multiline_history',    '多行历史↓键修复'),
-    (8,  'mod8_welcome_modified',     'Welcome 橙色 + Modified'),
-    (9,  'mod9_custom_effort_levels', 'effort 追加 max'),
-    (10, 'mod10_kitty_timeout',       'kitty 超时 200→999ms'),
+    {
+        'key': 'mod-hide-command-truncation',
+        'legacy_id': '1',
+        'script': 'mod_hide_command_truncation',
+        'desc': '隐藏命令截断提示',
+    },
+    {
+        'key': 'mod-expand-diff-lines',
+        'legacy_id': '4',
+        'script': 'mod_expand_diff_lines',
+        'desc': '扩展 diff/输出截断行数到 99',
+    },
+    {
+        'key': 'mod-cycle-custom-model',
+        'legacy_id': '6',
+        'script': 'mod_cycle_custom_model',
+        'desc': 'Ctrl+N 直接切换 custom model',
+    },
+    {
+        'key': 'mod-fix-multiline-history-down',
+        'legacy_id': '7',
+        'script': 'mod_fix_multiline_history_down',
+        'desc': '修复多行历史按 ↓ 无法回到空输入框',
+    },
+    {
+        'key': 'mod-highlight-welcome-modified',
+        'legacy_id': '8',
+        'script': 'mod_highlight_welcome_modified',
+        'desc': 'Welcome/Header 高亮 Modified 标记',
+    },
+    {
+        'key': 'mod-unlock-max-custom-effort',
+        'legacy_id': '9',
+        'script': 'mod_unlock_max_custom_effort',
+        'desc': '为 custom model 解锁 max effort',
+    },
+    {
+        'key': 'mod-extend-kitty-timeout',
+        'legacy_id': '10',
+        'script': 'mod_extend_kitty_timeout',
+        'desc': '将 kitty 检测超时扩到 999ms',
+    },
 ]
-MOD_IDS = {m[0] for m in MODS}
+MOD_KEYS = {m['key'] for m in MODS}
+LEGACY_IDS = {m['legacy_id']: m['key'] for m in MODS}
 IS_MAC = platform.system() == 'Darwin'
 
 
@@ -63,8 +99,8 @@ def run_restore():
     subprocess.run([sys.executable, str(DIR / 'restore.py')] + sys.argv[2:])
 
 
-def run_mod(num, name):
-    script = DIR / 'mods' / f'{name}.py'
+def run_mod(mod):
+    script = DIR / 'mods' / f'{mod["script"]}.py'
     r = subprocess.run([sys.executable, str(script)], capture_output=True, text=True)
     for line in r.stdout.strip().splitlines():
         print(f'  {line}')
@@ -104,16 +140,24 @@ def main():
             return
 
     # 解析 mod 选择
-    selected = MOD_IDS
+    selected = MOD_KEYS
     if len(sys.argv) > 1:
-        try:
-            selected = {int(x) for x in sys.argv[1].split(',')}
-            invalid = selected - MOD_IDS
-            if invalid:
-                print(f'错误: 未知 mod {invalid}，可选: {sorted(MOD_IDS)}')
-                sys.exit(1)
-        except ValueError:
-            print(f'用法: {sys.argv[0]} [status|restore|1,4,8]')
+        tokens = [x.strip() for x in sys.argv[1].split(',') if x.strip()]
+        selected = set()
+        invalid = []
+        for token in tokens:
+            if token in MOD_KEYS:
+                selected.add(token)
+            elif token in LEGACY_IDS:
+                selected.add(LEGACY_IDS[token])
+            else:
+                invalid.append(token)
+        if invalid:
+            print(f'错误: 未知 mod {invalid}，可选: {sorted(MOD_KEYS)}')
+            print(f'兼容旧编号: {sorted(LEGACY_IDS)}')
+            sys.exit(1)
+        if not selected:
+            print(f'用法: {sys.argv[0]} [status|restore|mod-hide-command-truncation,...]')
             sys.exit(1)
 
     ver = get_version()
@@ -132,11 +176,11 @@ def main():
     print('[3/4] 应用修改')
     size_before = DROID.stat().st_size
     ok, fail = 0, 0
-    for num, name, desc in MODS:
-        if num not in selected:
+    for mod in MODS:
+        if mod['key'] not in selected:
             continue
-        print(f'  mod{num}: {desc}')
-        if run_mod(num, name):
+        print(f'  {mod["key"]}: {mod["desc"]}')
+        if run_mod(mod):
             ok += 1
         else:
             fail += 1

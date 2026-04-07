@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""mod8: Welcome/Header 页面橙色 + "Modified" 版本标记
+"""mod-highlight-welcome-modified: Welcome/Header 页面橙色 + "Modified" 版本标记
 
 修改三个目标:
   1. rID 函数 (旧 Welcome 页面, JSX): 文字橙色 + 版本号 "Modified"
@@ -12,6 +12,7 @@ import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
 
+NAME = 'mod-highlight-welcome-modified'
 COLOR = b'color:"#FFA500"'
 COLOR_C = COLOR + b','
 
@@ -24,7 +25,7 @@ header_done = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
 style_done = b'"dim-bold":{color:"#FFA500"' in data
 
 if welcome_done and header_done and style_done:
-    print("mod8 已应用，跳过")
+    print(f"{NAME} 已应用，跳过")
     sys.exit(0)
 
 reps = []  # (位置, 旧, 新, 名称)
@@ -112,7 +113,7 @@ if not logo_done:
         print("警告: 未找到 logo 样式定义")
 
 if not reps:
-    print("mod8 失败: 没有找到任何可修改的目标")
+    print(f"{NAME} 失败: 没有找到任何可修改的目标")
     sys.exit(1)
 
 # 从高位到低位替换，避免偏移影响
@@ -130,4 +131,4 @@ for pos, old, new, name in reps:
 
 print(f"\n总计: {total_diff:+d} bytes")
 save_droid(data)
-print("mod8 完成")
+print(f"{NAME} 完成")

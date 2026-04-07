@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """补偿: R=80 → R=8 (-1 byte)
 截断函数签名: func(A, R=80, T=3)
-R 是宽度限制，被 mod1 短路后不再生效
+R 是宽度限制，被 mod-hide-command-truncation 短路后不再生效
 """
 import sys
 import re

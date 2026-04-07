@@ -12,22 +12,22 @@ with open(droid, 'rb') as f:
 
 results = {}
 
-# mod1: 截断条件
+# mod-hide-command-truncation: 截断条件
 # 用 isTruncated 定位截断函数（不依赖混淆后的函数名）
 # 原版: if(!V&&!V)return{text:V,isTruncated:!1}
 # 修改: if(!0||!V)return{text:V,isTruncated:!1}
 # 补偿后: ;/* ... */return{text:V,isTruncated:!1} (死代码被替换)
 if b'if(!0||!' in data:
-    results['mod1'] = 'modified'
+    results['mod-hide-command-truncation'] = 'modified'
 elif re.search(rb'/\*\s+\*/return\{text:' + V + rb',isTruncated:!1\}', data):
-    results['mod1'] = 'modified'  # comp_universal 补偿后形态
+    results['mod-hide-command-truncation'] = 'modified'
 elif re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data):
-    results['mod1'] = 'original'
+    results['mod-hide-command-truncation'] = 'original'
 else:
-    results['mod1'] = 'unknown'
+    results['mod-hide-command-truncation'] = 'unknown'
 
-# mod4: diff行数 — 两个截断路径
-def _mod4_detect():
+# mod-expand-diff-lines: diff行数 — 两个截断路径
+def _mod_expand_diff_lines_detect():
     # 路径1: gBT 文本截断 var VAR=(20|99),VAR=2000
     gbt_matches = list(re.finditer(rb'var ' + V + rb'=(20|99),' + V + rb'=2000', data))
     gbt = None
@@ -47,13 +47,16 @@ def _mod4_detect():
     if any(s == 'modified' for s in states):
         return 'partial'
     return 'original'
-results['mod4'] = _mod4_detect()
+results['mod-expand-diff-lines'] = _mod_expand_diff_lines_detect()
 
-# mod6: Ctrl+N custom model direct cycle (v0.94+ Pz 回调)
-def _mod6_detect():
+# mod-cycle-custom-model: Ctrl+N custom model direct cycle (v0.94+ Pz 回调)
+def _mod_cycle_custom_model_detect():
     # 新版: Pz 回调直接 cycle custom models
     if b'NR().getCustomModels().map(m=>m.id)' in data and (
             b'K_(n);wh({modelId:n})' in data or b'K_(M[' in data or b'yT().setModel(M[' in data):
+        return 'modified'
+    if (b'peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel())' in data
+            and b'if(BR)g2(BR.modelId)' in data):
         return 'modified'
     # 新版原版: Pz 回调弹出 selector
     if b'S9((eA)=>!eA)},[D0])' in data or re.search(
@@ -70,20 +73,20 @@ def _mod6_detect():
                 return 'original'
     return 'unknown'
 
-results['mod6'] = _mod6_detect()
+results['mod-cycle-custom-model'] = _mod_cycle_custom_model_detect()
 
-# mod7: 多行历史记录按↓修复
+# mod-fix-multiline-history-down: 多行历史记录按↓修复
 # 修改后: V(),!0 → spaces + !1
-mod7_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
-mod7_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
-if mod7_modified:
-    results['mod7'] = 'modified'
-elif mod7_original:
-    results['mod7'] = 'original'
+mod_fix_multiline_history_down_modified = re.search(rb'\),!0\}if\(' + V + rb'\)return\s+!1\}return!1', data)
+mod_fix_multiline_history_down_original = re.search(rb'\),!0\}if\((' + V + rb')\)return \1\(\),!0\}return!1', data)
+if mod_fix_multiline_history_down_modified:
+    results['mod-fix-multiline-history-down'] = 'modified'
+elif mod_fix_multiline_history_down_original:
+    results['mod-fix-multiline-history-down'] = 'original'
 else:
-    results['mod7'] = 'unknown'
+    results['mod-fix-multiline-history-down'] = 'unknown'
 
-# mod8: Welcome/Header 橙色 + "Modified" 标记
+# mod-highlight-welcome-modified: Welcome/Header 橙色 + "Modified" 标记
 welcome_mod = bool(re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data))
 header_mod = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
 style_mod = b'"dim-bold":{color:"#FFA500"' in data
@@ -92,30 +95,30 @@ logo_mod = b'logo:{color:"#FFA500"' in data
 header_orig_remain = bool(re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data))
 all_targets = [header_mod, style_mod, logo_mod]
 if all(all_targets) and not header_orig_remain:
-    results['mod8'] = 'modified'
+    results['mod-highlight-welcome-modified'] = 'modified'
 elif any(all_targets):
-    results['mod8'] = 'partial'
+    results['mod-highlight-welcome-modified'] = 'partial'
 elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data):
-    results['mod8'] = 'original'
+    results['mod-highlight-welcome-modified'] = 'original'
 else:
-    results['mod8'] = 'unknown'
+    results['mod-highlight-welcome-modified'] = 'unknown'
 
-# mod9: custom model effort 级别
+# mod-unlock-max-custom-effort: custom model effort 级别
 # 紧凑版: 在数组末尾追加 "max" (wUT 自动映射 openai "xhigh")
 if re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high","max"\]:\["none"\]', data):
-    results['mod9'] = 'modified'
+    results['mod-unlock-max-custom-effort'] = 'modified'
 elif re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high"\]:\["none"\]', data):
-    results['mod9'] = 'original'
+    results['mod-unlock-max-custom-effort'] = 'original'
 else:
-    results['mod9'] = 'unknown'
+    results['mod-unlock-max-custom-effort'] = 'unknown'
 
-# mod10: kitty keyboard 检测超时
+# mod-extend-kitty-timeout: kitty keyboard 检测超时
 if re.search(rb'setTimeout\(\w+,999\)', data) and b'enableKittyProtocol' in data:
-    results['mod10'] = 'modified'
+    results['mod-extend-kitty-timeout'] = 'modified'
 elif re.search(rb'setTimeout\(\w+,200\)', data) and b'enableKittyProtocol' in data:
-    results['mod10'] = 'original'
+    results['mod-extend-kitty-timeout'] = 'original'
 else:
-    results['mod10'] = 'unknown'
+    results['mod-extend-kitty-timeout'] = 'unknown'
 
 
 # 输出
@@ -163,7 +166,7 @@ else:
                 extra = m.get('extraArgs', {})
 
                 issues = []
-                has_mod9 = results.get('mod9') == 'modified'
+                has_max_effort_mod = results.get('mod-unlock-max-custom-effort') == 'modified'
 
                 # reasoningEffort 优先级:
                 #   有值 (low/medium/high/max/xhigh) → Droid 控制，extraArgs 中的 effort 被忽略
@@ -199,7 +202,7 @@ else:
                             f'extraArgs 中的整个 reasoning 对象必须移除（包括 summary）'
                             '（responses.create 中 extraArgs 浅展开会覆盖 requestParams.reasoning，'
                             '导致 effort 字段丢失，Tab 切换 Thinking Level 完全无效'
-                            + (f'；mod9 已解锁 xhigh' if has_mod9 else '') + '）'
+                            + (f'；mod-unlock-max-custom-effort 已解锁 xhigh' if has_max_effort_mod else '') + '）'
                             + keep_note)
 
                 icon = '✓' if not issues else '⚠'

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""mod4: Edit diff/输出截断行数 → 99 (0 bytes)
+"""mod-expand-diff-lines: Edit diff/输出截断行数 → 99 (0 bytes)
 
 两个截断路径:
   1. gBT 文本截断: var VAR=20,VAR=2000 (旧版，v0.93 及以前)
@@ -10,6 +10,8 @@
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
+
+NAME = 'mod-expand-diff-lines'
 
 data = load_droid()
 changed = False
@@ -51,8 +53,8 @@ else:
     print("bRD viewport: 未找到，跳过")
 
 if not changed:
-    print("mod4 已应用，跳过")
+    print(f"{NAME} 已应用，跳过")
     sys.exit(0)
 
 save_droid(data)
-print("mod4 完成")
+print(f"{NAME} 完成")

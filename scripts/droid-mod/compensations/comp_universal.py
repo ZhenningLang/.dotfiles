@@ -6,18 +6,18 @@
   bytes:  需要补偿的字节数（正数=缩减，负数=扩展）
 
 补偿区域 (按容量排序):
-  1. FFH 死代码 (mod1 短路后的不可达区域)    ~100-151B
-  2. mod6 validateModelAccess 注释 (3处)      ~36B
+  1. FFH 死代码 (mod-hide-command-truncation 后的不可达区域)  ~100-151B
+  2. mod-cycle-custom-model 注释 (3处)                        ~36B
 
 原理:
-  - ffh_dead: mod1 短路后的不可达代码，最小替换为 ';' (1 byte)
+  - ffh_dead: mod-hide-command-truncation 后的不可达代码，最小替换为 ';' (1 byte)
   - comment: /* spaces */ → 调整空格数，最小 /**/ (4 bytes)
 """
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
 
-# FFH 死代码最小替换: mod1 已短路返回, 死代码不执行, ';' 即可
+# FFH 死代码最小替换: mod-hide-command-truncation 已短路返回, 死代码不执行, ';' 即可
 FFH_MINIMAL = b';'  # 1 byte
 
 
@@ -31,8 +31,8 @@ def find_regions(data):
             seen.add(offset)
             regions.append((name, offset, content, min_size, rtype))
 
-    # 1. 截断函数死代码 (mod1 短路后的不可达区域)
-    # 定位 mod1 的 early return, 死代码在其后直到第二个 return
+    # 1. 截断函数死代码 (mod-hide-command-truncation 后的不可达区域)
+    # 定位早退 return，死代码在其后直到第二个 return
     trunc_pat = re.search(
         rb'if\(!0\|\|!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data)
     if trunc_pat:
@@ -57,7 +57,7 @@ def find_regions(data):
                 dead_content = data[dead_start:dead_end]
                 add('截断函数死代码', dead_start, dead_content, len(FFH_MINIMAL), 'ffh_dead')
 
-    # 2. mod6 注释 (3个函数) — 排除截断函数区域内的注释
+    # 2. mod-cycle-custom-model 注释 (3个函数) — 排除截断函数区域内的注释
     ffh_start = trunc_pat.start() if trunc_pat else -1
     ffh_end = ffh_start + 500 if ffh_start >= 0 else -1
     for m3 in re.finditer(rb'/\*( +)\*/', data):
@@ -65,7 +65,7 @@ def find_regions(data):
             continue
         s = len(m3.group(1))
         if 8 <= s <= 40:
-            add('mod6注释', m3.start(), m3.group(0), 4, 'comment')
+            add('mod-cycle-custom-model 注释', m3.start(), m3.group(0), 4, 'comment')
 
     return regions
 

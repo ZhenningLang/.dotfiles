@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""mod9: custom model 支持完整 effort 级别 (+6 bytes/处)
+"""mod-unlock-max-custom-effort: custom model 支持完整 effort 级别 (+6 bytes/处)
 
 问题: custom model 硬编码 supportedReasoningEfforts 为 ["off","low","medium","high"]，
 缺少 "max" 级别 (anthropic 的最高级, openai 由 wUT() 自动映射为 "xhigh")。
@@ -14,6 +14,8 @@ import re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
 from common import load_droid, save_droid, V
 
+NAME = 'mod-unlock-max-custom-effort'
+
 data = load_droid()
 
 OLD = b'["off","low","medium","high"]'
@@ -27,7 +29,7 @@ PAT = re.compile(
 )
 
 if PAT_MOD.search(data) and not PAT.search(data):
-    print("mod9 已应用，跳过")
+    print(f"{NAME} 已应用，跳过")
     sys.exit(0)
 
 matches = list(PAT.finditer(data))
@@ -43,5 +45,5 @@ for m in reversed(matches):
     diff = len(new) - len(old)
     total_diff += diff
 
-print(f"mod9: 共修改 {len(matches)} 处 ({total_diff:+d} bytes)")
+print(f"{NAME}: 共修改 {len(matches)} 处 ({total_diff:+d} bytes)")
 save_droid(data)

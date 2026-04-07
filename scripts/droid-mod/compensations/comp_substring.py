@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """通用补偿: 修改截断函数内的 substring 长度
 
-0.49+ 版本中，mod3 改为修改变量定义 (0 bytes)，通常不需要补偿。
+0.49+ 版本中，旧版 substring 补丁改为修改变量定义 (0 bytes)，通常不需要补偿。
 此脚本保留用于特殊情况。
 
 用法: python3 comp_substring.py <bytes>
