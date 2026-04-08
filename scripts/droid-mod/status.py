@@ -136,6 +136,33 @@ elif re.search(rb'setTimeout\(\w+,200\)', data) and b'enableKittyProtocol' in da
 else:
     results['mod-extend-kitty-timeout'] = 'unknown'
 
+# mod-summarizer-openai-fix: summarizer compress 对 openai provider 改走 chat completions
+mod_summarizer_openai_fix_original = re.search(
+    rb'provider==="openai"\)return\(await new ' + V + rb'\(\{apiKey:' + V
+    + rb'\.apiKey,baseURL:' + V + rb'\.baseUrl,organization:null,project:null,defaultHeaders:'
+    + V + rb'\.extraHeaders\}\)\.responses\.create\(\{model:' + V + rb',input:' + V
+    + rb',store:!1,instructions:' + V + rb',max_output_tokens:' + V
+    + rb'\}\)\)\.output_text;if\(' + V + rb'&&' + V + rb'\.provider==="generic-chat-completion-api"\)\{',
+    data,
+)
+mod_summarizer_openai_fix_modified = re.search(
+    rb'provider==="openai"&&!1\)return\(await new ' + V + rb'\(\{apiKey:' + V
+    + rb'\.apiKey,baseURL:' + V + rb'\.baseUrl,organization:null,project:null,defaultHeaders:'
+    + V + rb'\.extraHeaders\}\)\.responses\.create\(\{model:' + V + rb',input:' + V
+    + rb',store:!1,instructions:' + V + rb',max_output_tokens:' + V
+    + rb'\}\)\)\.output_text;if\(' + V + rb'&&\(' + V
+    + rb'\.provider==="generic-chat-completion-api"\|\|' + V + rb'\.provider=="openai"\)\)\{',
+    data,
+)
+if mod_summarizer_openai_fix_modified:
+    results['mod-summarizer-openai-fix'] = 'modified'
+elif mod_summarizer_openai_fix_original:
+    results['mod-summarizer-openai-fix'] = 'original'
+elif b'provider==="openai"&&!1)return(' in data or b'.provider=="openai")){' in data:
+    results['mod-summarizer-openai-fix'] = 'partial'
+else:
+    results['mod-summarizer-openai-fix'] = 'unknown'
+
 
 # 输出
 total = len(results)

@@ -56,6 +56,12 @@ MODS = [
         'script': 'mod_extend_kitty_timeout',
         'desc': '将 kitty 检测超时扩到 999ms',
     },
+    {
+        'key': 'mod-summarizer-openai-fix',
+        'legacy_id': '14',
+        'script': 'mod_summarizer_openai_fix',
+        'desc': 'compress 时让 OpenAI custom model 改走 Chat Completions',
+    },
 ]
 MOD_KEYS = {m['key'] for m in MODS}
 LEGACY_IDS = {m['legacy_id']: m['key'] for m in MODS}
