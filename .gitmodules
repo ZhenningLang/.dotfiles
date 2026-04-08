@@ -73,3 +73,6 @@
 [submodule "refs/addyosmani/web-quality-skills"]
 	path = refs/addyosmani/web-quality-skills
 	url = https://github.com/addyosmani/web-quality-skills
+[submodule "refs/HughYau/qiushi-skill"]
+	path = refs/HughYau/qiushi-skill
+	url = https://github.com/HughYau/qiushi-skill.git

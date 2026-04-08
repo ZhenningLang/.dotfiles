@@ -26,6 +26,7 @@
 | [`glittercowboy/taches-cc-resources`](./refs-details/glittercowboy/taches-cc-resources.md) | 技能集合与市场 | 面向 Claude Code 的资源仓库，主打技能开发、规划分层、MCP 服务生成、调试方法论与 Ralph 自治循环。 |
 | [`google-labs-code/stitch-skills`](./refs-details/google-labs-code/stitch-skills.md) | 前端 UI / 设计系统 | 围绕 Stitch MCP 的 Agent Skills 库，用于 UI 设计生成、设计系统提炼、React 转换和演示视频生成。 |
 | [`gsd-build/get-shit-done`](./refs-details/gsd-build/get-shit-done.md) | 研发流程 / 项目管理 | 跨多种 AI 运行时的 spec-driven development / context engineering 系统，覆盖立项、规划、执行、验证、交付全流程。 |
+| [`HughYau/qiushi-skill`](./refs-details/HughYau/qiushi-skill.md) | 行为协议 / 提示工程 | 从毛泽东思想中提炼"实事求是"总原则和九大方法论工具，系统性武装 AI Agent 的分析与决策能力，附带工作流编排和多平台插件。 |
 | [`libukai/awesome-agent-Skills`](./refs-details/libukai/awesome-agent-Skills.md) | 技能集合与市场 | 以 curated list 为主的技能资源集市，汇总教程、市场、官方项目，并附带少量实作 skill 与插件。 |
 | [`millionco/react-doctor`](./refs-details/millionco/react-doctor.md) | 代码质量 / 审查 / 调试 | React 代码体检工具仓库，核心是 CLI 扫描器，同时附带 GitHub Action、agent skill 和网站。 |
 | [`mksglu/context-mode`](./refs-details/mksglu/context-mode.md) | 上下文 / 记忆管理 | 面向多种 AI 编码运行时的 MCP/plugin，用来减少上下文窗口占用并保留会话连续性。 |
@@ -52,4 +53,4 @@
 - `automazeio/ccpm`、`gsd-build/get-shit-done`、`obra/superpowers` 更偏工程流程与项目执行方法学。
 - `google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills` 更偏前端 UI / 设计系统。
 - `millionco/react-doctor` 与 `addyosmani/web-quality-skills` 都属于代码质量/审查范畴，前者偏 React 代码体检，后者偏 Lighthouse / CWV / a11y / SEO 的 Web 质量审查。
-- `tanweai/pua` 明显是行为协议/提示工程类。
+- `tanweai/pua` 和 `HughYau/qiushi-skill` 都属于行为协议/提示工程类，前者偏高压激励/行为约束，后者偏哲学方法论/分析框架，二者互补。
