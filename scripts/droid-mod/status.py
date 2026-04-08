@@ -51,16 +51,32 @@ results['mod-expand-diff-lines'] = _mod_expand_diff_lines_detect()
 
 # mod-cycle-custom-model: Ctrl+N custom model direct cycle (v0.94+ Pz 回调)
 def _mod_cycle_custom_model_detect():
-    # 新版: Pz 回调直接 cycle custom models
-    if b'NR().getCustomModels().map(m=>m.id)' in data and (
-            b'K_(n);wh({modelId:n})' in data or b'K_(M[' in data or b'yT().setModel(M[' in data):
+    direct_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(gA\)=>gA\.id\);'
+        rb'if\(RR\.length<=1\)return;'
+        rb'let oR=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),'
+        rb'gA=RR\[\(RR\.indexOf\(oR\)\+1\)%RR\.length\];'
+        rb'if\(gA\)\w+\(gA\)\},\[\w+\]\)'
+    )
+    broken_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let \w+=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
+        rb'if\(\w+\)\w+\(\w+\.modelId\)\},\[\w+\]\)'
+    )
+    original_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'if\(\w+\.length<=1\)return;'
+        rb'let \w+=\w+\(\)\.getModelPolicy\(\);'
+        rb'if\(!\w+\.some\(\(\w+\)=>\w+\(\w+,\w+\)\.allowed\)\)return;'
+        rb'\w+\(\(\w+\)=>!\w+\)\},\[\w+\]\)'
+    )
+
+    if direct_callback_pat.search(data):
         return 'modified'
-    if (b'peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel())' in data
-            and b'if(BR)g2(BR.modelId)' in data):
-        return 'modified'
-    # 新版原版: Pz 回调弹出 selector
-    if b'S9((eA)=>!eA)},[D0])' in data or re.search(
-            rb'\w+\(\(\w+\)=>!\w+\)\},\[\w+\]\)', data):
+    if broken_callback_pat.search(data):
+        return 'partial'
+    if original_callback_pat.search(data):
         return 'original'
     # 旧版 mod: cycleModel 中注入 customModels
     for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel']:

@@ -2,62 +2,127 @@
 """mod-cycle-custom-model: Ctrl+N 在 custom models 间直接切换（不弹 selector）"""
 import sys, re
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-from common import load_droid, save_droid
+from common import load_droid, save_droid, V
 
 NAME = 'mod-cycle-custom-model'
-
-data = load_droid()
-
-CURRENT_MARKERS = (
-    b'peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel())',
-    b'if(BR)g2(BR.modelId)},[OC])',
+STABLE_INSERT = b'=this.customModels.map(m=>m.id);'
+DIRECT_CALLBACK_MARKER = b'GR().getCustomModels().map((gA)=>gA.id);if(RR.length<=1)return;'
+STABLE_TARGETS = (
+    b'peekNextCycleModel',
+    b'peekNextCycleSpecModeModel',
+    b'cycleSpecModeModel',
 )
 
-if all(marker in data for marker in CURRENT_MARKERS):
-    print(f"{NAME} 已应用，跳过")
-    sys.exit(0)
-
-BROKEN_MARKERS = (
-    b'peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel())',
-    b'if(BR)g2(BR.modelId)},[g2])',
-)
-
-if all(marker in data for marker in BROKEN_MARKERS):
-    data = data.replace(BROKEN_MARKERS[1], CURRENT_MARKERS[1], 1)
-    save_droid(data)
-    print(f"{NAME} 修复依赖数组: [g2] → [OC] (+0 bytes)")
-    print(f"{NAME} 完成")
-    sys.exit(0)
-
-pat = re.compile(
+ORIGINAL_CALLBACK_PAT = re.compile(
     rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
     rb'if\((?P<models>\w+)\.length<=1\)return;'
     rb'let (?P<policy>\w+)=(?P<service>\w+)\(\)\.getModelPolicy\(\);'
     rb'if\(!(?P=models)\.some\(\((?P<item>\w+)\)=>(?P<access>\w+)\((?P=item),(?P=policy)\)\.allowed\)\)return;'
     rb'(?P<toggle>\w+)\(\((?P<state>\w+)\)=>!(?P=state)\)'
-    rb'\},\[\w+\]\)'
+    rb'\},\[(?P<dep>\w+)\]\)'
     rb'(?=,(?P<handler>\w+)=\w+\.useCallback\(async\((?P<handler_arg>\w+)\)=>\{)'
 )
-m = pat.search(data)
-if not m:
-    print(f"{NAME} 失败: Ctrl+N selector 回调未找到")
-    sys.exit(1)
-
-old = m.group(0)
-groups = m.groupdict()
-prefix = groups["prefix"]
-handler = groups["handler"]
-new = (
-    prefix
-    + b'let BR=GR().peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel());'
-    + b'if(BR)' + handler + b'(BR.modelId)'
-    + b'},[' + groups["models"] + b'])'
+BROKEN_CALLBACK_PAT = re.compile(
+    rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
+    rb'let (?P<br>\w+)=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
+    rb'if\((?P=br)\)(?P<handler>\w+)\((?P=br)\.modelId\)'
+    rb'\},\[(?P<dep>\w+)\]\)'
 )
 
-delta = len(new) - len(old)
-data = data.replace(old, new, 1)
 
-assert new in data, "替换失败"
-save_droid(data)
-print(f"{NAME} Ctrl+N 回调: selector→direct cycle ({delta:+d} bytes)")
-print(f"{NAME} 完成")
+def is_direct_callback_patched(data):
+    return DIRECT_CALLBACK_MARKER in data
+
+
+def revert_stable_function_patch(data):
+    reverted = 0
+    for fn_name in STABLE_TARGETS:
+        entry_pat = re.compile(
+            fn_name + rb'\((?P<param>' + V + rb')(?:,' + V + rb')?\)\{(?P=param)'
+            + re.escape(STABLE_INSERT) + rb'if\((?P=param)\.length===0\)'
+        )
+        m_entry = entry_pat.search(data)
+        if not m_entry:
+            continue
+
+        old_entry = m_entry.group(0)
+        param = m_entry.group('param')
+        new_entry = old_entry.replace(param + STABLE_INSERT, b'', 1)
+
+        region_start = m_entry.start()
+        region = data[region_start:region_start + 600]
+        m_comment = re.search(
+            rb'/\*\s*\*/(?=try\{let ' + V + rb'=PJ\((?P<loop>' + V + rb')\);)',
+            region,
+        )
+        if not m_comment:
+            raise ValueError(f"{fn_name.decode()} 稳定函数补丁回滚失败: validate 注释未找到")
+
+        loop_var = m_comment.group('loop')
+        old_check = m_comment.group(0)
+        new_check = b'if(!this.validateModelAccess(' + loop_var + b').allowed)continue;'
+
+        check_offset = region_start + m_comment.start()
+        data = data[:check_offset] + new_check + data[check_offset + len(old_check):]
+
+        entry_offset = data.find(old_entry, max(0, region_start - 10), region_start + len(old_entry) + 10)
+        if entry_offset == -1:
+            raise ValueError(f"{fn_name.decode()} 稳定函数补丁回滚失败: 入口未重新定位")
+        data = data[:entry_offset] + new_entry + data[entry_offset + len(old_entry):]
+
+        reverted += 1
+        print(f"{fn_name.decode()}: 回滚稳定函数补丁")
+
+    return data, reverted
+
+
+def build_direct_callback(prefix, handler, dep):
+    return (
+        prefix
+        + b'let RR=GR().getCustomModels().map((gA)=>gA.id);'
+        + b'if(RR.length<=1)return;'
+        + b'let oR=VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel(),gA=RR[(RR.indexOf(oR)+1)%RR.length];'
+        + b'if(gA)' + handler + b'(gA)'
+        + b'},[' + dep + b'])'
+    )
+
+
+def patch_callback_to_direct(data):
+    if is_direct_callback_patched(data):
+        print(f"{NAME} 已应用，跳过")
+        return data, False
+
+    for label, pattern in (
+        ('修复旧错误回调', BROKEN_CALLBACK_PAT),
+        ('替换原版 selector 回调', ORIGINAL_CALLBACK_PAT),
+    ):
+        m = pattern.search(data)
+        if not m:
+            continue
+        old = m.group(0)
+        new = build_direct_callback(m.group('prefix'), m.group('handler'), m.group('dep'))
+        data = data.replace(old, new, 1)
+        print(f"{NAME} {label} ({len(new) - len(old):+d} bytes)")
+        return data, True
+
+    raise ValueError("Ctrl+N 回调未找到")
+
+
+def main():
+    data = load_droid()
+    try:
+        data, reverted = revert_stable_function_patch(data)
+        data, patched = patch_callback_to_direct(data)
+    except ValueError as exc:
+        print(f"{NAME} 失败: {exc}")
+        sys.exit(1)
+
+    if not reverted and not patched:
+        return
+
+    save_droid(data)
+    print(f"{NAME} 完成")
+
+
+if __name__ == '__main__':
+    main()
