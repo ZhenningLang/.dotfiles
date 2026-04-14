@@ -224,6 +224,38 @@ agent-browser batch --bail < commands.json
 
 Use `batch` when you have a known sequence of commands that don't depend on intermediate output. Use separate commands or `&&` chaining when you need to parse output between steps (e.g., snapshot to discover refs, then interact).
 
+## AI Chat (`chat`)
+
+Use `agent-browser chat` only when you want the CLI's built-in natural-language browser loop. Prefer explicit `open` / `snapshot` / `click` / `fill` commands for deterministic automation, reproducible debugging, and shell-scriptable workflows.
+
+```bash
+agent-browser chat "Open example.com and tell me the main call to action"
+agent-browser chat
+```
+
+Good fit:
+- quick exploratory browsing
+- one-off natural-language tasks
+- manually driving a page when exact refs are not important yet
+
+Avoid `chat` when:
+- you need reproducible step-by-step automation
+- you need stable `@eN` refs for follow-up commands
+- you are writing scripts, tests, or bug repro flows
+
+## Bundled Skills (`skills`)
+
+The CLI can serve its bundled skill files directly, which is useful when you want instructions that exactly match the installed `agent-browser` version instead of relying on a cached copy.
+
+```bash
+agent-browser skills                  # List available bundled skills
+agent-browser skills get agent-browser
+agent-browser skills get agent-browser --full
+agent-browser skills path agent-browser
+```
+
+Use `skills get <name> --full` when syncing or reviewing the latest local guidance. Set `AGENT_BROWSER_SKILLS_DIR` to override the bundled skills directory.
+
 ## Common Patterns
 
 ### Form Submission
@@ -717,14 +749,12 @@ Lightpanda does not support `--extension`, `--profile`, `--state`, or `--allow-f
 
 ## Observability Dashboard
 
-The dashboard is a standalone background server that shows live browser viewports, command activity, and console output for all sessions.
+The dashboard is a standalone background service that shows live browser viewports, command activity, and console output for all sessions.
 
 ```bash
-# Install the dashboard once
-agent-browser dashboard install
-
 # Start the dashboard server (background, port 4848)
 agent-browser dashboard start
+agent-browser dashboard start --port 8080
 
 # All sessions are automatically visible in the dashboard
 agent-browser open example.com
@@ -733,7 +763,9 @@ agent-browser open example.com
 agent-browser dashboard stop
 ```
 
-The dashboard runs independently of browser sessions on port 4848 (configurable with `--port`). All sessions automatically stream to the dashboard. Sessions can also be created from the dashboard UI with local engines or cloud providers.
+The dashboard runs independently of browser sessions on port 4848 (configurable with `--port`). All sessions automatically stream to the dashboard, even when they were started elsewhere. The UI can also create sessions with local engines or cloud providers.
+
+The dashboard can expose an optional AI chat panel when its gateway credentials are configured. Treat that chat panel as an exploratory surface; for reproducible automation, keep using explicit CLI commands in this skill.
 
 ## Ready-to-Use Templates
 
