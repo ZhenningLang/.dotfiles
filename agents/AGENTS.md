@@ -48,6 +48,14 @@
 - Ubiquitous Language（DDD）：代码命名与业务术语对齐，消除翻译层
 - Design-First：Capabilities → Components → Interactions → Contracts → Implementation，不批准不写代码
 
+### AI-friendly 代码约束
+
+- 优先写可预测、可局部修改、可验证的代码，而不是只追求“优雅”
+- 一个改动尽量只解决一类问题；重构、机械改动、行为修改尽量拆开
+- 业务规则优先显式化：类型、schema、状态机、规则表、明确函数，少依赖 tacit knowledge
+- 避免跨层穿透、隐式副作用、过度抽象、黑魔法式封装
+- 判断方案优先看影响面、可测试性、可 review 性，而不是作者主观偏好
+
 ### 质量与验证
 
 - **TDD 强制**：新功能、bug 修复、行为变更时，必须先调用 `/se-tdd` skill，走 Red→Green→Refactor 循环。先写失败测试再写实现，不是"写完实现补测试"。纯配置/文档/样式变更除外。

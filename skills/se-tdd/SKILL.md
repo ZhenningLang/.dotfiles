@@ -41,5 +41,6 @@ REFACTOR → 消除重复、改名、提取（保持绿灯）
 
 ## 关联技能
 
+- 发现边界混乱、规则不显式、难以落测试时 → 先 `/se-quality` 或 `/se-plan`
 - TDD 完成后 → `/se-verify` 最终验证
 - 连续失败 2 次 → `/se-unstuck`
