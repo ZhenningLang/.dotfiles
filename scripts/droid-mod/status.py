@@ -140,10 +140,25 @@ else:
     results['mod-highlight-welcome-modified'] = 'unknown'
 
 # mod-unlock-max-custom-effort: custom model effort 级别
-# 紧凑版: 在数组末尾追加 "max" (wUT 自动映射 openai "xhigh")
-if re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high","max"\]:\["none"\]', data):
+# 新版紧凑版: 列表路径 provider-aware + 当前模型路径 max-only
+provider_count = len(re.findall(
+    rb'supportedReasoningEfforts:' + V + rb'\?' + V
+    + rb'\.provider=="openai"\?\["none","low","medium","high","xhigh"\]:\["off","low","medium","high","max"\]:\["none"\]',
+    data,
+))
+max_only_count = len(re.findall(
+    rb'supportedReasoningEfforts:' + V + rb'\?\["off","low","medium","high","max"\]:\["none"\]',
+    data,
+))
+original_count = len(re.findall(
+    rb'supportedReasoningEfforts:' + V + rb'\?\["off","low","medium","high"\]:\["none"\]',
+    data,
+))
+if provider_count >= 2 or (provider_count >= 1 and max_only_count >= 1 and original_count == 0):
     results['mod-unlock-max-custom-effort'] = 'modified'
-elif re.search(rb'supportedReasoningEfforts:\w+\?\["off","low","medium","high"\]:\["none"\]', data):
+elif provider_count >= 1 or max_only_count >= 1:
+    results['mod-unlock-max-custom-effort'] = 'partial'
+elif original_count >= 1:
     results['mod-unlock-max-custom-effort'] = 'original'
 else:
     results['mod-unlock-max-custom-effort'] = 'unknown'
