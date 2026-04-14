@@ -31,3 +31,15 @@
 ## 备注
 
 - 强依赖 tmux + droid + Python 3.11+，不是通用编排框架。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`69`
+- [事实] 代表提交：
+  - `2026-04-13` `feat: add send gate to block `hive send/reply` when target is asking user`
+  - `2026-04-13` `feat: add `hive register` command for external pane registration`
+  - `2026-04-13` `feat: upgrade HIVE envelope to markdown code fence + frontmatter`
+  - `2026-04-13` `feat: add delivery ACK to hive send and reply`
+- [推断] 新增 send gate、`hive register`、delivery ACK、frontmatter 化的 HIVE envelope，以及跨 `droid`/`claude`/`codex` 的 hooks 安装与更顺手的 spawn/fork/kill 工作流。
+<!-- recent-updates:end -->

@@ -31,3 +31,12 @@
 ## 备注
 
 - 核心价值是协议/提示/Hook/分发素材，不是传统代码库。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`1`
+- [事实] 代表提交：
+  - `2026-03-31` `chore: update WeChat QR to group 7, bump cache v5→v7`
+- [事实] 近 14 天提交主要是微信群二维码与缓存版本更新，未见明确功能新增。
+<!-- recent-updates:end -->

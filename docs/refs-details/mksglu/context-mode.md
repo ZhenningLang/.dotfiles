@@ -31,3 +31,15 @@
 ## 备注
 
 - 并非所有平台都有完整 hook 支持；许可证是 Elastic-2.0。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`114`
+- [事实] 代表提交：
+  - `2026-04-14` `feat(insight): add ctx-insight skill for /ctx-insight slash command`
+  - `2026-04-14` `feat(insight): add personal analytics dashboard with ctx_insight tool`
+  - `2026-04-13` `feat(search): content-type-aware title boost in reranking (#265)`
+  - `2026-04-13` `feat(web): add open-to-opportunities badge with tooltip`
+- [推断] 连续发布 `1.0.79`~`1.0.88`，新增 `ctx-insight` skill 与个人 analytics dashboard/工具链，并补强 search、upgrade 与 CI 稳定性。
+<!-- recent-updates:end -->

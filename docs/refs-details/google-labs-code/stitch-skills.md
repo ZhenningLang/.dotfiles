@@ -30,3 +30,11 @@
 ## 备注
 
 - 强依赖 Stitch MCP；部分能力还依赖 Remotion MCP 或本地 Node 环境。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`0`
+- [事实] 这段时间没有新提交可列。
+- [事实] 默认分支近 14 天无新提交。
+<!-- recent-updates:end -->

@@ -31,3 +31,15 @@
 ## 备注
 
 - 当前快照重点是 source/build/website；文档中的 provider 数量说明与实际 build target 有版本差。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`141`
+- [事实] 代表提交：
+  - `2026-04-10` `Add skills check command, skip-if-up-to-date in update, decouple versioning`
+  - `2026-04-10` `Add cleanup script for deprecated skills with 20 tests`
+  - `2026-04-09` `Add scroll-margin-top to prose headings so anchors clear the sticky header`
+  - `2026-04-08` `Add invisible hover buffer around the before/after demo`
+- [推断] 新增 `skills check`、skip-if-up-to-date 更新逻辑与 cleanup 脚本，整理 skill 版图（21→18），上线 Chrome 扩展并持续扩展 UI anti-pattern 检测与站点渲染能力。
+<!-- recent-updates:end -->

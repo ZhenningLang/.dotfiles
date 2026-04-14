@@ -31,3 +31,14 @@
 ## 备注
 
 - 核心价值在 discipline 型 skills，不在命令数量。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`3`
+- [事实] 代表提交：
+  - `2026-04-06` `Fix Discord invite link`
+  - `2026-04-06` `Update Discord invite link`
+  - `2026-04-01` `Merge pull request #1029 from obra/readme-release-announcements`
+- [事实] 近 14 天提交主要是仓库入口维护（Discord 链接/公告），未见明确功能新增。
+<!-- recent-updates:end -->

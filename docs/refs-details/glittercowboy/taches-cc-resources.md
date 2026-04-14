@@ -30,3 +30,12 @@
 ## 备注
 
 - README 中列出的命令/技能数量已落后于当前目录树。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`1`
+- [事实] 代表提交：
+  - `2026-04-01` `feat: add the-pirate-bay skill`
+- [事实] 新增 `the-pirate-bay` skill。
+<!-- recent-updates:end -->

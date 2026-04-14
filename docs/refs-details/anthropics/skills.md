@@ -29,3 +29,14 @@
 ## 备注
 
 - 官方强调这是 demo/educational repo；部分文档处理技能是 source-available，不是完全开源实现。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`3`
+- [事实] 代表提交：
+  - `2026-04-09` `Add proper front-matter to SKILL.md for claude-api (#897)`
+  - `2026-04-13` `fix skill yaml rendering (#898)`
+  - `2026-04-08` `Update claude-api skill with Managed Agents guidance (#891)`
+- [推断] 主要更新在 `claude-api` skill：补上 Managed Agents 指南、front-matter，并修复 YAML 渲染。
+<!-- recent-updates:end -->

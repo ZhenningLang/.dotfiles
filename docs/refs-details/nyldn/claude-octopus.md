@@ -30,3 +30,15 @@
 ## 备注
 
 - 仓库层次非常多，更像编排平台；README 中数量以仓库自述为准。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`15`
+- [事实] 代表提交：
+  - `2026-04-10` `feat: CC v2.1.89-101 sync — 15 feature flags, PermissionDenied hook, session auto-titling, macOS CI`
+  - `2026-04-10` `chore: release v9.21.0 — CC v2.1.89-101 sync — 15 new feature flags (137 total), PermissionDenied audit hook, session auto-titling, macOS CI matrix, BSD/GNU portability lint`
+  - `2026-04-10` `fix: strip CRLF from jq output in doctor hook check (closes #258)`
+  - `2026-04-09` `fix: vendor ui-ux-pro-max-skill as plain files instead of submodule (closes #253)`
+- [推断] 同步 Claude Code `v2.1.89-101`，引入 15 个 feature flags、PermissionDenied 审计 hook、session auto-titling 与 macOS CI，并继续收敛 review/doctor/可移植性问题。
+<!-- recent-updates:end -->

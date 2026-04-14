@@ -31,3 +31,12 @@
 ## 备注
 
 - 不同文件对 stack/数量的描述略有不一致；源码与 CLI 打包资产并存。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`1`
+- [事实] 代表提交：
+  - `2026-04-03` `Merge pull request #184 from Jenser77/feat/design-system-visual-improvements`
+- [推断] 主要变化是设计系统视觉改进合并。
+<!-- recent-updates:end -->

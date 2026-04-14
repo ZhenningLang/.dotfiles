@@ -44,6 +44,53 @@
 | [`vercel-labs/skills`](./refs-details/vercel-labs/skills.md) | MCP / 工具链 / 安装分发 | 开放 Agent Skills 生态的 CLI/包管理器，用于发现、安装、列出、删除、更新技能，并维护多代理兼容性。 |
 | [`Yeachan-Heo/oh-my-claudecode`](./refs-details/Yeachan-Heo/oh-my-claudecode.md) | 多智能体协作与工作流编排 | 完整的 Claude Code 多智能体编排系统，含 CLI、skills、agents、hooks、tmux worker runtime 和验证模块。 |
 
+
+## 最近 14 天更新速览（2026-03-31 ~ 2026-04-14）
+
+- [事实] 范围：顶层 `.gitmodules` 中的 26 个 submodule。
+- [事实] 数据来源：各仓库默认分支最近 14 天的 `git log`；需要联网的仓库已先执行 `git fetch --all --tags --prune`。
+- [事实] 下表里的提交数按默认分支统计。
+- [推断] “新增/变化”列是根据 commit 标题与改动文件归纳，不等同于完整 release notes。
+
+| 项目 | 14 天提交数 | 新增/变化 |
+|---|---:|---|
+| [`affaan-m/everything-claude-code`](./refs-details/affaan-m/everything-claude-code.md) | 324 | [推断] 新增 dashboard GUI、gateguard pre-action gate 与 ecc2 legacy 配置导入迁移，随后集中修补安装、发布、权限与并发问题。 |
+| [`Yeachan-Heo/oh-my-claudecode`](./refs-details/Yeachan-Heo/oh-my-claudecode.md) | 296 | [推断] HUD 新增花费/Provider/worktree/hostname/cwd 等信息展示，release skill 改写为 repo-aware assistant，引入 LLM Wiki 知识层，并持续强化 permission/runtime/hook/tmux/Ralph 审批链。 |
+| [`gsd-build/get-shit-done`](./refs-details/gsd-build/get-shit-done.md) | 194 | [推断] 新增 `/gsd-graphify` 知识图谱、typed query 基础、worktree 健康检查、milestone seed 扫描、线程/快捷命令管理与更强的 TDD/审计/安全门禁。 |
+| [`pbakaus/impeccable`](./refs-details/pbakaus/impeccable.md) | 141 | [推断] 新增 `skills check`、skip-if-up-to-date 更新逻辑与 cleanup 脚本，整理 skill 版图（21→18），上线 Chrome 扩展并持续扩展 UI anti-pattern 检测与站点渲染能力。 |
+| [`mksglu/context-mode`](./refs-details/mksglu/context-mode.md) | 114 | [推断] 连续发布 `1.0.79`~`1.0.88`，新增 `ctx-insight` skill 与个人 analytics dashboard/工具链，并补强 search、upgrade 与 CI 稳定性。 |
+| [`notdp/hive`](./refs-details/notdp/hive.md) | 69 | [推断] 新增 send gate、`hive register`、delivery ACK、frontmatter 化的 HIVE envelope，以及跨 `droid`/`claude`/`codex` 的 hooks 安装与更顺手的 spawn/fork/kill 工作流。 |
+| [`vercel-labs/agent-browser`](./refs-details/vercel-labs/agent-browser.md) | 26 | [推断] 新增 `agent-browser skills` 命令；`v0.25.x` 带来 dashboard AI chat、stream 模块重构、`snapshot --urls` 与 batch 参数模式，并继续修复 viewport/HTTPS/标签页行为。 |
+| [`HughYau/qiushi-skill`](./refs-details/HughYau/qiushi-skill.md) | 21 | [推断] 新增案例分享/展示示例，补强方法论边界与安装路径说明，增加站点入口页（`index.html`/`.nojekyll`）与 README 展示增强，并加入 ASCII JSON 字符串处理能力。 |
+| [`notdp/.dotfiles`](./refs-details/notdp/.dotfiles.md) | 17 | [推断] `droid-bin-mod` 新增 unicode partial-json 修复与 ym9 tag strip truncation 修复，同时继续刷新镜像 skills，并补入 `lark-*`、`hfork`/`vfork`/`notify` 等能力。 |
+| [`nyldn/claude-octopus`](./refs-details/nyldn/claude-octopus.md) | 15 | [推断] 同步 Claude Code `v2.1.89-101`，引入 15 个 feature flags、PermissionDenied 审计 hook、session auto-titling 与 macOS CI，并继续收敛 review/doctor/可移植性问题。 |
+| [`ChromeDevTools/chrome-devtools-mcp`](./refs-details/ChromeDevTools/chrome-devtools-mcp.md) | 13 | [事实] 近 14 天提交标题以依赖升级、README 中新增 Mistral Vibe 配置说明和文档修复为主，未见明显功能型提交。 |
+| [`millionco/react-doctor`](./refs-details/millionco/react-doctor.md) | 6 | [推断] 发布 `0.0.31`/`0.0.32`/`0.0.33`，重点修复 setter 检测与 catalog resolution、file ignoring、CLI、React Native、Next.js、offline、monorepo 等问题。 |
+| [`vercel-labs/skills`](./refs-details/vercel-labs/skills.md) | 5 | [推断] 发布 `v1.5.0`/`v1.4.9`，改进项目级/全局级更新文案与单 skill update 路径，并增加对 `openclaw` 重复/恶意技能的风险警告。 |
+| [`anthropics/skills`](./refs-details/anthropics/skills.md) | 3 | [推断] 主要更新在 `claude-api` skill：补上 Managed Agents 指南、front-matter，并修复 YAML 渲染。 |
+| [`obra/superpowers`](./refs-details/obra/superpowers.md) | 3 | [事实] 近 14 天提交主要是仓库入口维护（Discord 链接/公告），未见明确功能新增。 |
+| [`glittercowboy/taches-cc-resources`](./refs-details/glittercowboy/taches-cc-resources.md) | 1 | [事实] 新增 `the-pirate-bay` skill。 |
+| [`nextlevelbuilder/ui-ux-pro-max-skill`](./refs-details/nextlevelbuilder/ui-ux-pro-max-skill.md) | 1 | [推断] 主要变化是设计系统视觉改进合并。 |
+| [`tanweai/pua`](./refs-details/tanweai/pua.md) | 1 | [事实] 近 14 天提交主要是微信群二维码与缓存版本更新，未见明确功能新增。 |
+| [`vercel-labs/agent-skills`](./refs-details/vercel-labs/agent-skills.md) | 1 | [推断] 主要变化是继续打磨 `react-view-transition` skill。 |
+| [`addyosmani/web-quality-skills`](./refs-details/addyosmani/web-quality-skills.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`automazeio/ccpm`](./refs-details/automazeio/ccpm.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`Dimillian/Skills`](./refs-details/Dimillian/Skills.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`google-labs-code/stitch-skills`](./refs-details/google-labs-code/stitch-skills.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`libukai/awesome-agent-Skills`](./refs-details/libukai/awesome-agent-Skills.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`muratcankoylan/Agent-Skills-for-Context-Engineering`](./refs-details/muratcankoylan/Agent-Skills-for-Context-Engineering.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+| [`travisvn/awesome-claude-Skills`](./refs-details/travisvn/awesome-claude-Skills.md) | 0 | [事实] 默认分支近 14 天无新提交。 |
+
+### 近 14 天无更新的仓库
+
+- `automazeio/ccpm`
+- `Dimillian/Skills`
+- `google-labs-code/stitch-skills`
+- `libukai/awesome-agent-Skills`
+- `muratcankoylan/Agent-Skills-for-Context-Engineering`
+- `travisvn/awesome-claude-Skills`
+- `addyosmani/web-quality-skills`
+
 ## 补充观察
 
 - `travisvn/awesome-claude-Skills`、`libukai/awesome-agent-Skills` 更偏导航/市场/索引；适合找来源，不适合直接当能力实现。

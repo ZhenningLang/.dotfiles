@@ -41,3 +41,11 @@
 - 更像“Web 质量审查/优化知识库 + skill 包”，而不是通用型 agent 基础设施。
 - `seo` 的范围主要是技术 SEO / 页面结构 / structured data，不覆盖完整内容策略与外链运营。
 - 仓库自身无运行时依赖，`CLAUDE.md` 给出的校验方式是可选的 skill 格式验证和 markdown lint。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`0`
+- [事实] 这段时间没有新提交可列。
+- [事实] 默认分支近 14 天无新提交。
+<!-- recent-updates:end -->

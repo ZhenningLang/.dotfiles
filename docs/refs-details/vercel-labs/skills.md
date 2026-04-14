@@ -31,3 +31,15 @@
 ## 备注
 
 - 重点是 CLI 与 agent 兼容层，不是技能内容库；README 很多内容由脚本生成。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`5`
+- [事实] 代表提交：
+  - `2026-04-12` `v1.5.0`
+  - `2026-04-06` `v1.4.9`
+  - `2026-04-03` `v1.4.8`
+  - `2026-04-11` `Better updating, project level updating, global level updating copy, single skill update (#913)`
+- [推断] 发布 `v1.5.0`/`v1.4.9`，改进项目级/全局级更新文案与单 skill update 路径，并增加对 `openclaw` 重复/恶意技能的风险警告。
+<!-- recent-updates:end -->

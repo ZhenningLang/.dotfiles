@@ -31,3 +31,15 @@
 ## 备注
 
 - 架构文档中的数量统计与当前目录树略有差异。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`194`
+- [事实] 代表提交：
+  - `2026-04-13` `feat: /gsd-graphify integration — knowledge graph for planning agents (#2164)`
+  - `2026-04-12` `feat(sdk): Phase 1 typed query foundation (gsd-sdk query) (#2118)`
+  - `2026-04-12` `feat(health): detect stale and orphan worktrees in validate-health (W017) (#2175)`
+  - `2026-04-12` `feat(workflow): scan planted seeds during new-milestone step 2.5 (#2177)`
+- [推断] 新增 `/gsd-graphify` 知识图谱、typed query 基础、worktree 健康检查、milestone seed 扫描、线程/快捷命令管理与更强的 TDD/审计/安全门禁。
+<!-- recent-updates:end -->

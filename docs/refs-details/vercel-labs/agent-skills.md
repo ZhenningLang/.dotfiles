@@ -30,3 +30,12 @@
 ## 备注
 
 - README 中的名字与实际目录/skill name 有少量漂移；web-design-guidelines 的规则需运行时远程抓取。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`1`
+- [事实] 代表提交：
+  - `2026-04-02` `Refine react-view-transition skill`
+- [推断] 主要变化是继续打磨 `react-view-transition` skill。
+<!-- recent-updates:end -->

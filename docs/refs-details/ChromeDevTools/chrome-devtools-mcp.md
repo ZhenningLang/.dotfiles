@@ -30,3 +30,15 @@
 ## 备注
 
 - 默认会收集 usage statistics，可通过 flag/env 关闭；官方支持重点是 Chrome / Chrome for Testing。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`13`
+- [事实] 代表提交：
+  - `2026-04-02` `docs: fix skill and reference documentation issues (#1249)`
+  - `2026-04-13` `chore(deps-dev): bump globals from 17.4.0 to 17.5.0 in the dev-dependencies group (#1857)`
+  - `2026-04-13` `chore(deps-dev): bump the dev-dependencies group across 1 directory with 9 updates (#1844)`
+  - `2026-04-13` `chore(deps): bump basic-ftp from 5.2.1 to 5.2.2 (#1849)`
+- [事实] 近 14 天提交标题以依赖升级、README 中新增 Mistral Vibe 配置说明和文档修复为主，未见明显功能型提交。
+<!-- recent-updates:end -->

@@ -30,3 +30,15 @@
 ## 备注
 
 - README 中关于 agent 数量的说法与目录树可见数量不完全一致。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`296`
+- [事实] 代表提交：
+  - `2026-04-12` `feat(hud): display extra usage spend data in HUD (closes #2570)`
+  - `2026-04-13` `feat(hud): add MiniMax coding plan usage provider`
+  - `2026-04-12` `feat(hud): split usage cache by provider to eliminate cross-session thrashing`
+  - `2026-04-11` `feat(release): rewrite release skill as generic repo-aware assistant (#2501)`
+- [推断] HUD 新增花费/Provider/worktree/hostname/cwd 等信息展示，release skill 改写为 repo-aware assistant，引入 LLM Wiki 知识层，并持续强化 permission/runtime/hook/tmux/Ralph 审批链。
+<!-- recent-updates:end -->

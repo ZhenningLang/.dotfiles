@@ -30,3 +30,15 @@
 ## 备注
 
 - skill 很薄，核心能力在 CLI/package 源码里。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`6`
+- [事实] 代表提交：
+  - `2026-04-10` `0.0.33`
+  - `2026-04-10` `0.0.32`
+  - `2026-04-06` `0.0.31`
+  - `2026-04-10` `fix: restrict setter detection to direct Identifier callees (#122)`
+- [推断] 发布 `0.0.31`/`0.0.32`/`0.0.33`，重点修复 setter 检测与 catalog resolution、file ignoring、CLI、React Native、Next.js、offline、monorepo 等问题。
+<!-- recent-updates:end -->

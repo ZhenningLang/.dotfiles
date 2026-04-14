@@ -31,3 +31,15 @@
 ## 备注
 
 - 仓库同时是 CLI + 技能文档 + 文档站源码，能力面大于单纯 npm 包。
+
+## 最近 14 天更新（2026-03-31 ~ 2026-04-14）
+<!-- recent-updates:start -->
+- [事实] 检查基线：`origin/main`
+- [事实] 提交数：`26`
+- [事实] 代表提交：
+  - `2026-04-12` `Add `agent-browser skills` command with evals (#1225)`
+  - `2026-04-06` `Add AI chat to dashboard, refactor stream module, snapshot --urls, batch argument mode (#1160)`
+  - `2026-04-06` `v0.25.3 (#1176)`
+  - `2026-04-06` `v0.25.2 (#1174)`
+- [推断] 新增 `agent-browser skills` 命令；`v0.25.x` 带来 dashboard AI chat、stream 模块重构、`snapshot --urls` 与 batch 参数模式，并继续修复 viewport/HTTPS/标签页行为。
+<!-- recent-updates:end -->
