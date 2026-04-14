@@ -53,13 +53,31 @@ results['mod-expand-diff-lines'] = _mod_expand_diff_lines_detect()
 def _mod_cycle_custom_model_detect():
     direct_callback_pat = re.compile(
         rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(gA\)=>gA\.id\);'
+        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\)\.filter\(\(\w+\)=>!\w+\.includes\("\["\)\);'
         rb'if\(RR\.length<=1\)return;'
-        rb'let oR=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),'
-        rb'gA=RR\[\(RR\.indexOf\(oR\)\+1\)%RR\.length\];'
-        rb'if\(gA\)\w+\(gA\)\},\[\w+\]\)'
+        rb'let \w+=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),\w+=RR\[\(RR\.indexOf\(\w+\)\+1\)%RR\.length\];'
+        rb'if\(\w+\)\w+\(\w+\)\},\[\w+\]\)'
     )
-    broken_callback_pat = re.compile(
+    compact_filtered_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\)\.filter\(\(\w+\)=>!\w+\.includes\("\["\)\);'
+        rb'if\(RR\.length<=1\)return;'
+        rb'let \w+=\w+\(\);if\(\w+=RR\[\(RR\.indexOf\(\w+\.hasSpecModeModel\(\)\?\w+\.getSpecModeModel\(\):\w+\.getModel\(\)\)\+1\)%RR\.length\]\)\w+\(\w+\)\},\[\w+\]\)'
+    )
+    compact_direct_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\);'
+        rb'if\(RR\.length<=1\)return;'
+        rb'let \w+=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),\w+=RR\[\(RR\.indexOf\(\w+\)\+1\)%RR\.length\];'
+        rb'if\(\w+\)\w+\(\w+\)\},\[\w+\]\)'
+    )
+    broken_direct_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let RR=\w+\(\)\.peekNextCycleModel\('
+        rb'\w+,\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):null\);'
+        rb'if\(RR\)\w+\(RR\.modelId\)\},\[\w+\]\)'
+    )
+    old_broken_callback_pat = re.compile(
         rb'\w+=\w+\.useCallback\(\(\)=>\{'
         rb'let \w+=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
         rb'if\(\w+\)\w+\(\w+\.modelId\)\},\[\w+\]\)'
@@ -74,7 +92,13 @@ def _mod_cycle_custom_model_detect():
 
     if direct_callback_pat.search(data):
         return 'modified'
-    if broken_callback_pat.search(data):
+    if compact_filtered_callback_pat.search(data):
+        return 'modified'
+    if compact_direct_callback_pat.search(data):
+        return 'partial'
+    if broken_direct_callback_pat.search(data):
+        return 'partial'
+    if old_broken_callback_pat.search(data):
         return 'partial'
     if original_callback_pat.search(data):
         return 'original'
@@ -102,19 +126,15 @@ elif mod_fix_multiline_history_down_original:
 else:
     results['mod-fix-multiline-history-down'] = 'unknown'
 
-# mod-highlight-welcome-modified: Welcome/Header 橙色 + "Modified" 标记
-welcome_mod = bool(re.search(rb'color:"#FFA500",children:"v\d+\.\d+\.\d+ Modified"', data))
-header_mod = bool(re.search(rb'"v\d+\.\d+\.\d+ Modified","dim-bold"', data))
+# mod-highlight-welcome-modified: Welcome/Header 橙色高亮
 style_mod = b'"dim-bold":{color:"#FFA500"' in data
 logo_mod = b'logo:{color:"#FFA500"' in data
-# else 分支也需要改 — 检查是否还有未改的版本号
-header_orig_remain = bool(re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data))
-all_targets = [header_mod, style_mod, logo_mod]
-if all(all_targets) and not header_orig_remain:
+all_targets = [style_mod, logo_mod]
+if all(all_targets):
     results['mod-highlight-welcome-modified'] = 'modified'
 elif any(all_targets):
     results['mod-highlight-welcome-modified'] = 'partial'
-elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb',"v\d+\.\d+\.\d+","dim-bold"\)', data):
+elif re.search(rb'dimColor:!0,children:"v\d+\.\d+\.\d+"', data) or re.search(rb'"dim-bold":\{color:' + V + rb'\.text\.secondary,', data):
     results['mod-highlight-welcome-modified'] = 'original'
 else:
     results['mod-highlight-welcome-modified'] = 'unknown'
@@ -135,34 +155,6 @@ elif re.search(rb'setTimeout\(\w+,200\)', data) and b'enableKittyProtocol' in da
     results['mod-extend-kitty-timeout'] = 'original'
 else:
     results['mod-extend-kitty-timeout'] = 'unknown'
-
-# mod-summarizer-openai-fix: summarizer compress 对 openai provider 改走 chat completions
-mod_summarizer_openai_fix_original = re.search(
-    rb'provider==="openai"\)return\(await new ' + V + rb'\(\{apiKey:' + V
-    + rb'\.apiKey,baseURL:' + V + rb'\.baseUrl,organization:null,project:null,defaultHeaders:'
-    + V + rb'\.extraHeaders\}\)\.responses\.create\(\{model:' + V + rb',input:' + V
-    + rb',store:!1,instructions:' + V + rb',max_output_tokens:' + V
-    + rb'\}\)\)\.output_text;if\(' + V + rb'&&' + V + rb'\.provider==="generic-chat-completion-api"\)\{',
-    data,
-)
-mod_summarizer_openai_fix_modified = re.search(
-    rb'provider==="openai"&&!1\)return\(await new ' + V + rb'\(\{apiKey:' + V
-    + rb'\.apiKey,baseURL:' + V + rb'\.baseUrl,organization:null,project:null,defaultHeaders:'
-    + V + rb'\.extraHeaders\}\)\.responses\.create\(\{model:' + V + rb',input:' + V
-    + rb',store:!1,instructions:' + V + rb',max_output_tokens:' + V
-    + rb'\}\)\)\.output_text;if\(' + V + rb'&&\(' + V
-    + rb'\.provider==="generic-chat-completion-api"\|\|' + V + rb'\.provider=="openai"\)\)\{',
-    data,
-)
-if mod_summarizer_openai_fix_modified:
-    results['mod-summarizer-openai-fix'] = 'modified'
-elif mod_summarizer_openai_fix_original:
-    results['mod-summarizer-openai-fix'] = 'original'
-elif b'provider==="openai"&&!1)return(' in data or b'.provider=="openai")){' in data:
-    results['mod-summarizer-openai-fix'] = 'partial'
-else:
-    results['mod-summarizer-openai-fix'] = 'unknown'
-
 
 # 输出
 total = len(results)

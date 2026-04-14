@@ -6,7 +6,10 @@ from common import load_droid, save_droid, V
 
 NAME = 'mod-cycle-custom-model'
 STABLE_INSERT = b'=this.customModels.map(m=>m.id);'
-DIRECT_CALLBACK_MARKER = b'GR().getCustomModels().map((gA)=>gA.id);if(RR.length<=1)return;'
+DIRECT_CALLBACK_MARKER = (
+    b'GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
+    b'if(RR.length<=1)return;'
+)
 STABLE_TARGETS = (
     b'peekNextCycleModel',
     b'peekNextCycleSpecModeModel',
@@ -27,6 +30,13 @@ BROKEN_CALLBACK_PAT = re.compile(
     rb'let (?P<br>\w+)=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
     rb'if\((?P=br)\)(?P<handler>\w+)\((?P=br)\.modelId\)'
     rb'\},\[(?P<dep>\w+)\]\)'
+)
+CURRENT_BROKEN_CALLBACK_PAT = re.compile(
+    rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
+    rb'let (?P<br>\w+)=\w+\(\)\.peekNextCycleModel\('
+    rb'(?P<dep>\w+),\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):null\);'
+    rb'if\((?P=br)\)(?P<handler>\w+)\((?P=br)\.modelId\)'
+    rb'\},\[(?P=dep)\]\)'
 )
 
 
@@ -79,10 +89,10 @@ def revert_stable_function_patch(data):
 def build_direct_callback(prefix, handler, dep):
     return (
         prefix
-        + b'let RR=GR().getCustomModels().map((gA)=>gA.id);'
+        + b'let RR=GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
         + b'if(RR.length<=1)return;'
-        + b'let oR=VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel(),gA=RR[(RR.indexOf(oR)+1)%RR.length];'
-        + b'if(gA)' + handler + b'(gA)'
+        + b'let oR=VT();if(gA=RR[(RR.indexOf(oR.hasSpecModeModel()?oR.getSpecModeModel():oR.getModel())+1)%RR.length])'
+        + handler + b'(gA)'
         + b'},[' + dep + b'])'
     )
 
@@ -93,6 +103,7 @@ def patch_callback_to_direct(data):
         return data, False
 
     for label, pattern in (
+        ('修复当前 lw 错误回调', CURRENT_BROKEN_CALLBACK_PAT),
         ('修复旧错误回调', BROKEN_CALLBACK_PAT),
         ('替换原版 selector 回调', ORIGINAL_CALLBACK_PAT),
     ):

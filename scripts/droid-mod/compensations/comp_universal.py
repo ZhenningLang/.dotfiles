@@ -7,10 +7,13 @@
 
 补偿区域 (按容量排序):
   1. FFH 死代码 (mod-hide-command-truncation 后的不可达区域)  ~100-151B
-  2. mod-cycle-custom-model 注释 (3处)                        ~36B
+  2. mod-highlight-welcome-modified 颜色填充                  ~12B
+  3. mod-fix-multiline-history-down 空白填充                  ~6B
+  4. 旧版 mod-cycle-custom-model 注释 (兼容历史补丁)          ~36B
 
 原理:
   - ffh_dead: mod-hide-command-truncation 后的不可达代码，最小替换为 ';' (1 byte)
+  - padding: 可选空白/注释填充，可缩到 0 byte
   - comment: /* spaces */ → 调整空格数，最小 /**/ (4 bytes)
 """
 import sys, re
@@ -67,6 +70,55 @@ def find_regions(data):
         if 8 <= s <= 40:
             add('mod-cycle-custom-model 注释', m3.start(), m3.group(0), 4, 'comment')
 
+    # 2.5 substring 长度字面量: substring(0,2000) → substring(0,8)
+    substring_pat = re.search(rb'substring\(0,(2000)\)', data)
+    if substring_pat:
+        add(
+            'substring 长度',
+            substring_pat.start(1),
+            substring_pat.group(1),
+            1,
+            'digits',
+        )
+
+    # 3. mod-fix-multiline-history-down 的空白填充
+    history_pat = re.search(
+        rb'\),!0\}if\(' + V + rb'\)return(?P<spaces> +)!1\}return!1',
+        data,
+    )
+    if history_pat:
+        add(
+            '多行历史空白填充',
+            history_pat.start('spaces'),
+            history_pat.group('spaces'),
+            0,
+            'padding',
+        )
+
+    # 4. mod-highlight-welcome-modified 的颜色填充
+    dim_bold_pat = re.search(
+        rb'"dim-bold":\{color:"#FFA500"(?P<padding>/\* *\*/| +),',
+        data,
+    )
+    if dim_bold_pat:
+        add(
+            'dim-bold 颜色填充',
+            dim_bold_pat.start('padding'),
+            dim_bold_pat.group('padding'),
+            0,
+            'padding',
+        )
+
+    logo_pat = re.search(rb'logo:\{color:"#FFA500"(?P<padding> +),', data)
+    if logo_pat:
+        add(
+            'logo 颜色填充',
+            logo_pat.start('padding'),
+            logo_pat.group('padding'),
+            0,
+            'padding',
+        )
+
     return regions
 
 
@@ -85,6 +137,19 @@ def resize_region(old_bytes, target_size, rtype):
         if inner < 0:
             return None
         return b'/*' + b' ' * inner + b'*/'
+
+    elif rtype == 'digits':
+        if target_size <= 0 or target_size > len(old_bytes):
+            return None
+        trimmed = old_bytes[:target_size]
+        if not trimmed or trimmed == b'0':
+            return None
+        return trimmed
+
+    elif rtype == 'padding':
+        if target_size < 0:
+            return None
+        return b' ' * target_size
 
     return None
 
