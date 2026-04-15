@@ -76,3 +76,6 @@
 [submodule "refs/HughYau/qiushi-skill"]
 	path = refs/HughYau/qiushi-skill
 	url = https://github.com/HughYau/qiushi-skill.git
+[submodule "refs/shanraisshan/claude-code-best-practice"]
+	path = refs/shanraisshan/claude-code-best-practice
+	url = https://github.com/shanraisshan/claude-code-best-practice.git

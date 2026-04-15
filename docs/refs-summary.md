@@ -8,6 +8,7 @@
 - **上下文 / 记忆管理**：围绕上下文压缩、记忆持久化、检索、session 连续性与 context engineering。 代表项目：`mksglu/context-mode`、`muratcankoylan/Agent-Skills-for-Context-Engineering`
 - **前端 UI / 设计系统**：围绕视觉设计、组件模式、设计系统、界面审查与 UI 生成。 代表项目：`google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills`
 - **研发流程 / 项目管理**：围绕 spec/planning/execution/verification/ship 等工程流程与项目管理。 代表项目：`automazeio/ccpm`、`gsd-build/get-shit-done`、`obra/superpowers`
+- **最佳实践 / 知识库**：围绕 Claude Code 概念地图、目录约定、功能导航与实践经验整理。 代表项目：`shanraisshan/claude-code-best-practice`
 - **代码质量 / 审查 / 调试**：围绕静态分析、review、质量门禁、调试与诊断。 代表项目：`millionco/react-doctor`、`addyosmani/web-quality-skills`
 - **MCP / 工具链 / 安装分发**：围绕 MCP、CLI、安装器、技能包管理、多 Agent 兼容与基础设施。 代表项目：`vercel-labs/skills`
 - **行为协议 / 提示工程**：围绕提示协议、行为约束、激励/约束机制、触发词和 hook 协同。 代表项目：`tanweai/pua`
@@ -37,6 +38,7 @@
 | [`nyldn/claude-octopus`](./refs-details/nyldn/claude-octopus.md) | 多智能体协作与工作流编排 | 超大体量的多模型编排插件，把 Claude Code/Droid 扩展成带工作流、角色、hooks、MCP 和兼容层的协作系统。 |
 | [`obra/superpowers`](./refs-details/obra/superpowers.md) | 研发流程 / 项目管理 | 强调纪律化开发流程的技能包，让 coding agent 按“先规格、后计划、再实现与复核”的方式工作。 |
 | [`pbakaus/impeccable`](./refs-details/pbakaus/impeccable.md) | 前端 UI / 设计系统 | 面向前端设计质量的跨平台技能/命令打包仓库，附带官网、下载 API 和构建系统。 |
+| [`shanraisshan/claude-code-best-practice`](./refs-details/shanraisshan/claude-code-best-practice.md) | 最佳实践 / 知识库 | Claude Code 生态知识库，系统整理 commands、skills、subagents、memory、hooks 与工作流最佳实践，并给出对应实现入口。 |
 | [`tanweai/pua`](./refs-details/tanweai/pua.md) | 行为协议 / 提示工程 | 面向多种 AI 编码代理的“高压/高主动性”技能包，核心是 PUA/PIP 风格提示、命令、hooks 和多平台分发素材。 |
 | [`travisvn/awesome-claude-Skills`](./refs-details/travisvn/awesome-claude-Skills.md) | 技能集合与市场 | 纯 curated list 仓库，汇总官方和社区 Claude Skills、教程、资源、安全建议与 FAQ。 |
 | [`vercel-labs/agent-browser`](./refs-details/vercel-labs/agent-browser.md) | 浏览器自动化与前端调试 | 原生 Rust 驱动的浏览器自动化 CLI，并附带多套面向 AI 代理的技能文档。 |
@@ -47,7 +49,7 @@
 
 ## 最近 14 天更新速览（2026-03-31 ~ 2026-04-14）
 
-- [事实] 范围：顶层 `.gitmodules` 中的 26 个 submodule。
+- [事实] 范围：顶层 `.gitmodules` 中的 27 个 submodule。
 - [事实] 数据来源：各仓库默认分支最近 14 天的 `git log`；需要联网的仓库已先执行 `git fetch --all --tags --prune`。
 - [事实] 下表里的提交数按默认分支统计。
 - [推断] “新增/变化”列是根据 commit 标题与改动文件归纳，不等同于完整 release notes。
@@ -69,6 +71,7 @@
 | [`vercel-labs/skills`](./refs-details/vercel-labs/skills.md) | 5 | [推断] 发布 `v1.5.0`/`v1.4.9`，改进项目级/全局级更新文案与单 skill update 路径，并增加对 `openclaw` 重复/恶意技能的风险警告。 |
 | [`anthropics/skills`](./refs-details/anthropics/skills.md) | 3 | [推断] 主要更新在 `claude-api` skill：补上 Managed Agents 指南、front-matter，并修复 YAML 渲染。 |
 | [`obra/superpowers`](./refs-details/obra/superpowers.md) | 3 | [事实] 近 14 天提交主要是仓库入口维护（Discord 链接/公告），未见明确功能新增。 |
+| [`shanraisshan/claude-code-best-practice`](./refs-details/shanraisshan/claude-code-best-practice.md) | 0 | [事实] 默认分支近 14 天无新提交；当前一次可见提交落在 `2026-04-15`，不在本统计窗口内。 |
 | [`glittercowboy/taches-cc-resources`](./refs-details/glittercowboy/taches-cc-resources.md) | 1 | [事实] 新增 `the-pirate-bay` skill。 |
 | [`nextlevelbuilder/ui-ux-pro-max-skill`](./refs-details/nextlevelbuilder/ui-ux-pro-max-skill.md) | 1 | [推断] 主要变化是设计系统视觉改进合并。 |
 | [`tanweai/pua`](./refs-details/tanweai/pua.md) | 1 | [事实] 近 14 天提交主要是微信群二维码与缓存版本更新，未见明确功能新增。 |
@@ -88,6 +91,7 @@
 - `google-labs-code/stitch-skills`
 - `libukai/awesome-agent-Skills`
 - `muratcankoylan/Agent-Skills-for-Context-Engineering`
+- `shanraisshan/claude-code-best-practice`
 - `travisvn/awesome-claude-Skills`
 - `addyosmani/web-quality-skills`
 
@@ -98,6 +102,7 @@
 - `Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus` 属于多智能体/多模型协作平台型项目。
 - `mksglu/context-mode` 与 `muratcankoylan/Agent-Skills-for-Context-Engineering` 更适合归入上下文工程/记忆管理范畴。
 - `automazeio/ccpm`、`gsd-build/get-shit-done`、`obra/superpowers` 更偏工程流程与项目执行方法学。
+- `shanraisshan/claude-code-best-practice` 更像 Claude Code 生态知识库/导航站，适合提炼 skill 触发器、command 路由与全局记忆压缩原则，不适合整套照搬为团队规范。
 - `google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills` 更偏前端 UI / 设计系统。
 - `millionco/react-doctor` 与 `addyosmani/web-quality-skills` 都属于代码质量/审查范畴，前者偏 React 代码体检，后者偏 Lighthouse / CWV / a11y / SEO 的 Web 质量审查。
 - `tanweai/pua` 和 `HughYau/qiushi-skill` 都属于行为协议/提示工程类，前者偏高压激励/行为约束，后者偏哲学方法论/分析框架，二者互补。
