@@ -64,6 +64,11 @@ def _mod_cycle_custom_model_detect():
         rb'if\(RR\.length<=1\)return;'
         rb'let \w+=\w+\(\);if\(\w+=RR\[\(RR\.indexOf\(\w+\.hasSpecModeModel\(\)\?\w+\.getSpecModeModel\(\):\w+\.getModel\(\)\)\+1\)%RR\.length\]\)\w+\(\w+\)\},\[\w+\]\)'
     )
+    compact_id_list_callback_pat = re.compile(
+        rb'\w+=\w+\.useCallback\(\(\)=>\{'
+        rb'let RR=\w+(?:\(\))?\.filter\(g=>!g\.includes\("\["\)\),o=\w+\(\);'
+        rb'RR\[1\]&&\w+\(RR\[RR\.indexOf\(o\.hasSpecModeModel\(\)&&o\.getSpecModeModel\(\)\|\|o\.getModel\(\)\)\+1\]\|\|RR\[0\]\)\},\[\w+\]\)'
+    )
     compact_direct_callback_pat = re.compile(
         rb'\w+=\w+\.useCallback\(\(\)=>\{'
         rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\);'
@@ -93,6 +98,8 @@ def _mod_cycle_custom_model_detect():
     if direct_callback_pat.search(data):
         return 'modified'
     if compact_filtered_callback_pat.search(data):
+        return 'modified'
+    if compact_id_list_callback_pat.search(data):
         return 'modified'
     if compact_direct_callback_pat.search(data):
         return 'partial'

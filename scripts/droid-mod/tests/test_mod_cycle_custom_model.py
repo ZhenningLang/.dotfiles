@@ -19,6 +19,25 @@ FILTERED_DIRECT_CALLBACK_MARKER = (
 COMPACT_FILTERED_CALLBACK_TAIL = (
     b'let oR=VT();if(gA=RR[(RR.indexOf(oR.hasSpecModeModel()?oR.getSpecModeModel():oR.getModel())+1)%RR.length])Yk(gA)'
 )
+SUPER_COMPACT_CALLBACK_MARKER = (
+    b'let RR=jG.filter(g=>!g.includes("[")),o=VT();'
+)
+SUPER_COMPACT_CALLBACK_TAIL = (
+    b'RR[1]&&HV(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
+)
+BROKEN_SUPER_COMPACT_CALLBACK_MARKER = (
+    b'let RR=Y8A().filter(g=>!g.includes("[")),o=VT();'
+)
+BROKEN_SUPER_COMPACT_CALLBACK_TAIL = (
+    b'RR[1]&&Yk(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
+)
+CURRENT_SUPER_COMPACT_CALLBACK_MARKER = (
+    b'let RR=lw.filter(g=>!g.includes("[")),o=VT();'
+)
+ORIGINAL_CALLBACK_BYTES = (
+    b"fu=M9.useCallback(()=>{if(jG.length<=1)return;let PA=QZ().getModelPolicy();if(!jG.some((g)=>AB(g,PA).allowed))return;SW((x)=>!x)},[jG]),"
+    b"HV=M9.useCallback(async(RR)=>{return RR},[AA])"
+)
 
 BROKEN_PATCHED_BYTES = (
     b"peekNextCycleModel(H,T){H=this.customModels.map(m=>m.id);if(H.length===0)return null;let R=T??this.getModel(),A=H.indexOf(R),B=A===-1?0:A;"
@@ -62,6 +81,23 @@ def _run(script: Path, home: Path) -> subprocess.CompletedProcess[str]:
 
 
 class ModCycleCustomModelTests(unittest.TestCase):
+    def test_patches_original_callback_with_shorter_filtered_cycle_logic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            droid = _write_droid(home, ORIGINAL_CALLBACK_BYTES)
+
+            result = _run(SCRIPT, home)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            patched = droid.read_bytes()
+            self.assertIn(SUPER_COMPACT_CALLBACK_MARKER, patched)
+            self.assertIn(SUPER_COMPACT_CALLBACK_TAIL, patched)
+            self.assertLessEqual(len(patched) - len(ORIGINAL_CALLBACK_BYTES), 32)
+
+            status = _run(STATUS, home)
+            self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
+            self.assertIn("mod-cycle-custom-model: 已修改", status.stdout)
+
     def test_repairs_broken_patch_and_status_detects_it(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             home = Path(tmpdir)
@@ -74,8 +110,8 @@ class ModCycleCustomModelTests(unittest.TestCase):
             self.assertNotEqual(patched, BROKEN_PATCHED_BYTES)
             self.assertEqual(patched.count(b"this.customModels.map(m=>m.id)"), 0)
             self.assertEqual(patched.count(b"validateModelAccess("), 3)
-            self.assertIn(FILTERED_DIRECT_CALLBACK_MARKER, patched)
-            self.assertIn(COMPACT_FILTERED_CALLBACK_TAIL, patched)
+            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_MARKER, patched)
+            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_TAIL, patched)
             self.assertNotIn(
                 b"peekNextCycleModel(lw,VT().hasSpecModeModel()?VT().getSpecModeModel():null)",
                 patched,
@@ -99,8 +135,8 @@ class ModCycleCustomModelTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             patched = droid.read_bytes()
-            self.assertIn(FILTERED_DIRECT_CALLBACK_MARKER, patched)
-            self.assertIn(COMPACT_FILTERED_CALLBACK_TAIL, patched)
+            self.assertIn(CURRENT_SUPER_COMPACT_CALLBACK_MARKER, patched)
+            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_TAIL, patched)
             self.assertNotIn(
                 b"peekNextCycleModel(lw,VT().hasSpecModeModel()?VT().getSpecModeModel():null)",
                 patched,

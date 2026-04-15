@@ -10,6 +10,7 @@ DIRECT_CALLBACK_MARKER = (
     b'GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
     b'if(RR.length<=1)return;'
 )
+ID_LIST_CALLBACK_MARKER = b'.filter(g=>!g.includes("[")),o=VT();RR[1]&&'
 STABLE_TARGETS = (
     b'peekNextCycleModel',
     b'peekNextCycleSpecModeModel',
@@ -41,7 +42,7 @@ CURRENT_BROKEN_CALLBACK_PAT = re.compile(
 
 
 def is_direct_callback_patched(data):
-    return DIRECT_CALLBACK_MARKER in data
+    return DIRECT_CALLBACK_MARKER in data or ID_LIST_CALLBACK_MARKER in data
 
 
 def revert_stable_function_patch(data):
@@ -86,13 +87,12 @@ def revert_stable_function_patch(data):
     return data, reverted
 
 
-def build_direct_callback(prefix, handler, dep):
+def build_direct_callback(prefix, handler, dep, models_expr):
     return (
         prefix
-        + b'let RR=GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
-        + b'if(RR.length<=1)return;'
-        + b'let oR=VT();if(gA=RR[(RR.indexOf(oR.hasSpecModeModel()?oR.getSpecModeModel():oR.getModel())+1)%RR.length])'
-        + handler + b'(gA)'
+        + b'let RR=' + models_expr + b'.filter(g=>!g.includes("[")),o=VT();'
+        + b'RR[1]&&' + handler
+        + b'(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
         + b'},[' + dep + b'])'
     )
 
@@ -111,7 +111,14 @@ def patch_callback_to_direct(data):
         if not m:
             continue
         old = m.group(0)
-        new = build_direct_callback(m.group('prefix'), m.group('handler'), m.group('dep'))
+        models_expr = (
+            m.group('models')
+            if 'models' in m.groupdict() and m.group('models') is not None
+            else m.group('dep')
+            if label == '修复当前 lw 错误回调'
+            else b'Y8A()'
+        )
+        new = build_direct_callback(m.group('prefix'), m.group('handler'), m.group('dep'), models_expr)
         data = data.replace(old, new, 1)
         print(f"{NAME} {label} ({len(new) - len(old):+d} bytes)")
         return data, True
