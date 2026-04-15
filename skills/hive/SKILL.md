@@ -1,6 +1,7 @@
 ---
 name: hive
-description: Hive 基础 skill。让 agent 作为 Hive runtime 成员工作：发现上下文、查看成员、接收 `<HIVE ...>` 消息、发布状态、发送消息，并加载更高层 workflow skill。
+description: Hive 基础 skill。让 agent 作为 Hive runtime 成员工作：发现上下文、查看成员、接收 <HIVE ...> 消息、发送消息，并加载更高层 workflow skill。
+argument-hint: <消息目标|任务说明|留空=自动发现上下文>
 metadata: {"hive-bot":{"emoji":"💬","os":["darwin","linux"],"requires":{"bins":["tmux","droid","python3","hive"]}}}
 ---
 
@@ -22,7 +23,7 @@ pipx install git+https://github.com/notdp/hive.git
 
 1. 独立使用 Hive 基础能力
 2. 先确定上下文，再执行消息/协作命令
-3. 必要时再加载更高层 workflow skill（例如 `cross-review`）
+3. 必要时再加载更高层 workflow skill（例如 `code-review`）
 
 ## 先确定上下文
 
@@ -40,13 +41,12 @@ pipx install git+https://github.com/notdp/hive.git
 ```bash
 hive current                          # 当前上下文（无 team 时自动发现 tmux）
 hive init                             # 从 tmux window 创建 team，自动注册所有 pane
-hive team                             # 查看成员
+hive team                             # 查看成员和 runtime inputState
 hive send claude "hello"              # 发消息（第1个参数=收件人，第2个=内容）
 hive send claude "see attachment" --artifact /tmp/file.md
+hive answer claude "yes"              # 回答 agent 的 pending question
 hive notify "按 Space 和我对话"       # 给当前 pane 对应的用户弹出通知（Space 跳回这里，任意键关闭）
 hive notify "重构完成，帮我 review 一下"
-hive status-set busy "working on X"   # 发布状态
-hive status                           # 查看所有人状态
 hive teams                            # 列出已知 team
 ```
 
@@ -54,30 +54,38 @@ hive teams                            # 列出已知 team
 
 1. 先 `hive current`（无 team 时跑 `hive init`）
 2. 再 `hive team`
-3. 其他 agent 发来的消息会直接以 `<HIVE from=... to=... [artifact=...]> ... </HIVE>` 形式出现在当前 pane
-4. 发消息用 `hive send <name> "<message>"`（positional，不要用 --to）
-5. 大内容写 artifact，再把路径通过 `hive send <name> "see artifact" --artifact <path>` 发出去
-6. 开始任务时主动 `hive status-set busy ...`
-7. 完成时 `hive status-set done ... --meta artifact=<path>`
+3. 其他 agent 发来的消息会直接以 `<HIVE ...> ... </HIVE>` 形式出现在当前 pane
+4. 发任务用 `hive send <name> "<message>"`
+5. 完成任务或回传结果时，用 `hive send <name> "<message>" [--artifact <path>]`
+6. 大内容或多行结构化内容先写 artifact，再通过 `hive send --artifact <path>` 发送；不要把 `$(cat <<EOF ...)` 这类多行 command substitution 直接塞进 `hive send`
+7. `hive team` 显示每个 agent 的 runtime `inputState`（ready / waiting_user / unknown / offline）；如果某个 agent 的 `inputState` 是 `waiting_user`，说明它在等答案，用 `hive answer` 回答
 8. `hive notify` 只面向当前 pane 的用户，不用于 agent 之间互相通知
-9. 只有当“不马上看这条通知，agent 就无法继续，或者用户会错过关键时机”时，才允许 `hive notify`
+9. 只有当"不马上看这条通知，agent 就无法继续，或者用户会错过关键时机"时，才允许 `hive notify`
 10. 允许触发 `hive notify` 的典型场景：任务完成且用户明确在等结果；需要用户做决策；遇到阻塞且必须用户介入；执行 `git push`、覆盖文件、跑迁移、删除数据等高风险动作前需要确认
-11. 禁止用 `hive notify` 做这些事：普通进度汇报、阶段性小完成、可选建议、agent 仍可自行继续推进的情况；凡是能通过 `status` 或 artifact 表达的，就不要打断用户
-12. `hive notify` 的文案应站在 agent 对 user 说话的角度，直接说清楚“发生了什么 / 为什么现在需要你 / 按 `Space` 回来后要做什么”；浮层里按 `Space` 会跳回当前 pane，按任意键只关闭浮层
+11. 禁止用 `hive notify` 做这些事：普通进度汇报、阶段性小完成、可选建议、agent 仍可自行继续推进的情况；凡是能通过 `hive team` 或 artifact 表达的，就不要打断用户
+12. `hive notify` 的文案应站在 agent 对 user 说话的角度，直接说清楚"发生了什么 / 为什么现在需要你 / 按 `Space` 回来后要做什么"；浮层里按 `Space` 会跳回当前 pane，按任意键只关闭浮层
+13. 升级顺序：有疑问时先用 `hive send` 问团队里的其他 agent。只有满足以下任一条件时才升级给用户：(a) 团队内没有其他 agent 可问；(b) 决策涉及不可逆外部副作用（`git push`、发 PR comment、删除数据、通知外部系统）；(c) 用户明确要求参与该类决策。
 
 ## 协议边界
 
-- `hive send` 是 tmux 内联消息注入，适合发任务、澄清、blocker、请求对方采取下一步动作
-- `hive status-set` / `hive status` / `hive wait-status` 是控制面状态快照，适合表示 `busy/done/fail`、阶段、artifact 路径等
-- 对 workflow 来说，**完成态默认用 `status + artifact` 回传，不要再机械发送 `hive send <orchestrator> "... complete"`**
+- `hive send` 是发送消息的唯一入口，会写入 workspace `events/`
+- `hive answer` 用于回答 agent 的 pending question（AskUserQuestion）；只有目标处于 `waiting_user` 时才允许
+- `hive team` 的 `inputState` 字段是从 agent session transcript 实时探测的 runtime 状态，不是事件投影
 - GitHub PR comment / review 属于 workflow 层职责；需要发评论时直接用 `gh` / `gh api`，不要把这类 API 混进 Hive kernel 命令
-- [推断] `hive send` 不是严格可靠消息队列：没有送达确认、幂等性或 backpressure；需要可轮询、可恢复的完成信号时，应依赖 `status` 和 workspace artifact
+- Hive 不是严格可靠消息队列：没有幂等性或 backpressure；需要恢复上下文时，应依赖 `events/` 和 workspace artifact
+
+## Gotchas
+
+- 没先跑 `hive current` / `hive team` 就开始发消息，很容易发错上下文
+- 没有 team 时要先 `hive init`，不要把 tmux 里看到的 pane 当成已注册成员
+- 多行大内容不要硬塞进 `hive send`；先写 artifact 再发送
+- `hive notify` 只在必须打断用户时使用，普通进度更新不要滥用
 
 ## 加载 workflow
 
 Hive 是基础 skill。更高层流程应在 Hive 之上加载，例如：
 
-- 由 orchestrator 执行 `hive workflow load <agent> cross-review`
-- 或在 spawn 时使用 `hive spawn <agent> --workflow cross-review`
+- 由 orchestrator 执行 `hive workflow load <agent> code-review`
+- 或在 spawn 时使用 `hive spawn <agent> --workflow code-review`
 
 当 workflow skill 被加载后，继续使用 Hive 命令作为通信与状态底座。

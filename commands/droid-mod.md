@@ -7,6 +7,12 @@ argument-hint: <status | apply | apply 1,4,8 | restore>
 
 脚本位置: `scripts/droid-mod/`
 
+## 适用场景
+
+- 检查当前 droid 是否已应用本仓库维护的二进制 mod
+- 需要批量应用指定 mod，或从备份恢复原版 droid
+- 排查 mod 是否生效、是否被新版本 droid 覆盖
+
 ## 子命令
 
 | 命令 | 说明 |
@@ -61,3 +67,9 @@ python3 "$SCRIPT_DIR/restore.py" --list
 2. `apply` 会自动处理备份、签名、字节补偿，补偿失败会自动恢复
 3. 修改后提示用户「新开一个 droid 窗口验证」
 4. 不要在 droid 正在运行修改操作时中断
+
+## Gotchas
+
+- `status` 是入口，不要直接假设当前二进制状态
+- 新版本 droid 可能导致某些 mod 偏移失效；异常时先看 `status` 和脚本输出，不要盲目重试
+- 这类修改只影响本机二进制，不适合当成仓库级通用配置能力

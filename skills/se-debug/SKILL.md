@@ -1,6 +1,7 @@
 ---
 name: se-debug
-description: 系统化调试（科学方法，子 agent 隔离分析）。用户报告 bug、错误、异常行为时使用。
+description: 出现 bug、错误、异常行为、复现不稳定时使用；先复现和定位，再修复。
+argument-hint: <bug 描述|错误信息|复现步骤>
 ---
 
 # Debug
@@ -70,6 +71,17 @@ description: 系统化调试（科学方法，子 agent 隔离分析）。用户
 - 原始 bug 已修复
 - 回归测试通过
 - 边界用例检查
+
+## Gotchas
+
+- 不复现就不要修；先找最小触发条件
+- 假设不是结论，所有归因都要有证据
+- 不要一次改多处再看哪个生效，这会掩盖根因
+- 调试修复应尽量单一目的，不要把重构夹带进来
+
+## 扩展阅读
+
+- `docs/software-engineering-research/debug.md`
 
 ## 禁止
 

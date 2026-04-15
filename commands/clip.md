@@ -1,21 +1,26 @@
 ---
-description: Copy content to clipboard
-argument-hint: <content to copy>
+description: 复制内容到系统剪贴板
+argument-hint: <要复制的内容>
 ---
 
-Copy the provided content to the system clipboard.
+将给定内容复制到系统剪贴板。
 
-## Commands
+## 适用场景
+
+- 需要把命令输出、片段文本、URL 或多行内容快速放入剪贴板
+- 后续要粘贴到浏览器、编辑器、聊天窗口或其他外部工具
+
+## 命令
 
 - macOS: `printf '%s' 'content' | pbcopy`
 - Linux: `printf '%s' 'content' | xclip -selection clipboard`
 - Windows: `printf '%s' 'content' | clip`
 
-## Rules
+## 规则
 
-1. Execute the command, don't just output
-2. Use `printf '%s'` instead of `echo` (avoids trailing newline issues)
-3. For multi-line or special characters, use heredoc:
+1. 直接执行复制命令，不要只把内容打印出来
+2. 使用 `printf '%s'` 而不是 `echo`，避免多出换行
+3. 多行内容或特殊字符优先用 heredoc：
 
    ```bash
    pbcopy <<'EOF'
@@ -23,5 +28,5 @@ Copy the provided content to the system clipboard.
    EOF
    ```
 
-4. Confirm after execution: "Copied"
-5. Do not modify the original content
+4. 执行后明确确认：`Copied`
+5. 不要改写原始内容

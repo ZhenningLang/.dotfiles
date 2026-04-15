@@ -127,6 +127,22 @@ Droid 支持两个直接相关的 hook 事件：
 
 Factory 推荐的跨 session 记忆：`~/.factory/memories.md`（个人）+ `.factory/memories.md`（项目），通过 AGENTS.md 引用。这是静态记忆，不是 compact 恢复。
 
+## claude-code-best-practice 的补充启发
+
+从 `shanraisshan/claude-code-best-practice` 可以再补三条对本仓库有直接价值的经验：
+
+1. **全局记忆文件保持短、小、硬**
+   - 经验点：`CLAUDE.md` 目标控制在 200 行以内，避免把背景材料、流程细节和局部规则都塞进一个文件。
+   - 对应启发：`agents/AGENTS.md` 只保留全局硬约束，其余内容应下沉到 `skills/`、`commands/` 或 `docs/`。
+
+2. **能靠配置/机制强制的，不要只写成自然语言**
+   - 经验点：像 attribution、permissions、model、hooks 这类规则，优先放到 `settings.json` / hooks / 工具链里，而不是全靠记忆文件提醒。
+   - 对应启发：AGENTS.md 更适合写“原则和门禁”，不适合承载本可程序化的执行细节。
+
+3. **skill 的描述字段本身就是记忆压缩器**
+   - 经验点：`description` 要写成触发条件，让运行时更容易在需要时自动发现正确的 skill。
+   - 对应启发：高质量触发描述可以减少“把大段说明常驻全局上下文”的冲动，把知识保留在按需加载的 skill 内部。
+
 ## 参考链接
 
 - Factory 压缩评测：https://factory.ai/news/evaluating-compression

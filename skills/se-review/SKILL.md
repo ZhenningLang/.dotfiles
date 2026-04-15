@@ -1,6 +1,7 @@
 ---
 name: se-review
-description: 代码审查（支持 simple/deep 两种模式）。用户要求 review、审查代码变更时使用。
+description: 用户要求 review、审查代码变更、合并前把关时使用；默认先看 diff，再给分级结论与 merge 裁决。
+argument-hint: <分支名|commit-range|--deep|留空=未提交变更>
 ---
 
 # Review
@@ -78,6 +79,17 @@ Ready to merge? Yes / No / With fixes
 2. 技术上合理 → 实施修复，每条单独测试
 3. 不合理 → 带理由推回（破坏现有功能 / 违反 YAGNI / 技术不适用）
 4. 不明确 → 全部澄清后再动手
+
+## 5. Gotchas
+
+- 没有明确失败路径、触发条件和影响面，不要上升到 `Critical` / `Important`
+- review 的对象默认是当前 diff，不是借题发挥做全仓库猎巫
+- 没有 `file:line` 或明确 diff 片段的意见，价值很低
+- “建议更优雅”不等于问题；优先判断是否影响正确性、需求、结构质量或可维护性
+
+## 扩展阅读
+
+- `docs/software-engineering-research/review.md`
 
 ## 禁止
 

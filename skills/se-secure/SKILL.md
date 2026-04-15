@@ -1,6 +1,7 @@
 ---
 name: se-secure
-description: 安全审查（STRIDE 威胁建模）。用户要求安全审查、漏洞扫描时使用。
+description: 安全审查（STRIDE 威胁建模）。用户要求安全审查、漏洞扫描、评估攻击面时使用。
+argument-hint: <文件/目录|功能描述|留空=最近变更>
 ---
 
 # Secure
@@ -52,6 +53,17 @@ description: 安全审查（STRIDE 威胁建模）。用户要求安全审查、
 - 只报告有证据的风险，不报告理论上的可能性
 - 检查 hardcoded secrets、SQL 注入、XSS、路径穿越等常见漏洞
 - 关注数据流：用户输入 → 处理 → 存储 → 输出的每个环节
+
+## Gotchas
+
+- “理论上可能”不等于安全问题；要给触发条件、影响路径和证据
+- 不要只盯单点 API；安全问题通常跨越输入、存储、权限和输出链路
+- 缺少认证/鉴权/速率限制时，要区分这是已知设计选择还是实际漏洞
+- 安全审查结论必须可执行，不能只留下抽象恐吓
+
+## 扩展阅读
+
+- `docs/software-engineering-research/other-directions.md`
 
 ## 关联技能
 

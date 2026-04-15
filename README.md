@@ -6,6 +6,9 @@ My Droid skills/scripts
 
 | Command | Description |
 |---------|-------------|
+| `/clip` | 复制内容到系统剪贴板 |
+| `/vim` | 打开外部编辑器，从空白草稿开始输入下一条消息 |
+| `/cvim` | 打开外部编辑器，以当前会话内容为基础编辑并返回 diff |
 | `/droid-mod` | 修改/检查/恢复 droid 二进制 |
 | `/fe-audit` | 前端设计质量审计（设计原则 + 反模式 + 可访问性 + 代码健康） |
 
@@ -21,22 +24,34 @@ My Droid skills/scripts
 | `se-ship` | 交付（PR 模式或直接发布模式） |
 | `se-research` | 实现前技术调研（选型、最佳实践、风险） |
 | `se-secure` | 安全审查（STRIDE 威胁建模） |
+| `se-quality` | 结构质量评估；判断代码/架构/diff 是否适合继续修改 |
 | `se-tdd` | TDD 工作流；新功能/bug 修复时使用 |
 | `se-verify` | 完成前验证；要求提供验证证据 |
 | `se-unstuck` | 结构化排查；连续失败 2 次、卡壳时触发 |
-| `frontend-design` | 前端设计约束；做前端时自动加载 |
-| `react-doctor` | React 代码健康检查；React 项目中自动运行 |
+| `hive` | Hive 协作运行时；用于多 agent 通信、team 上下文与消息传递 |
+| `agent-browser` | 浏览器自动化与页面调试；需要浏览器交互、截图、表单操作时使用 |
+| `frontend-design` | 前端设计约束；创建 web 组件、页面或应用时使用 |
+| `react-doctor` | React 代码健康检查；React 改动后运行，用于提前发现问题 |
+
+## 指令分工
+
+| 放哪里 | 适用场景 | 不该放什么 |
+|--------|----------|------------|
+| `agents/AGENTS.md` | 全局硬约束、事实与验证红线、所有任务都成立的行为边界 | 高频流程步骤、领域细则、长篇背景知识 |
+| `commands/` | 一天会重复多次的高频 inner-loop 工作流 | 只在少数场景才需要的长知识库 |
+| `skills/` | 领域能力、流程能力、按需触发的专项约束 | 本应全局生效的硬规则 |
+| `docs/` | 调研沉淀、refs 详情、设计取舍与可追溯背景 | 需要每次任务都注入上下文的规则 |
 
 ### 技能串联
 
 ```
-se-research ─→ se-plan ─→ se-tdd ─→ se-verify ─→ se-ship
-                             │                       │
-                             ↓                       ↓
-                         se-refactor            se-review
-                             │
-                             ↓
-                         se-verify
+se-map/se-research ─→ se-quality ─→ se-plan ─→ se-tdd ─→ se-verify ─→ se-ship
+                         │              │                       │           │
+                         │              ↓                       ↓           ↓
+                         │          se-refactor            se-review    hive/agent-browser
+                         │              │
+                         │              ↓
+                         └──────────→ se-verify
 
 se-debug ─→ se-verify        （任何 skill 卡住时）→ se-unstuck
 se-secure ─→ se-debug/se-tdd
@@ -58,8 +73,21 @@ se-secure ─→ se-debug/se-tdd
 - **AGENTS.md 保持权威** — 全局准则不受干扰
 - **用户控制粒度** — 快速修复直接改，严谨开发时 `/se-plan` → `/se-tdd`
 - **零 idle 开销** — Skill 仅在触发时加载（agent 也可主动调用）
+- **渐进式披露** — skill 主文件只保留高信号规则，细节优先下沉到 `refs/`、`examples/`、`scripts/`
+- **description 当触发器** — 让模型知道“什么时候该调用”，而不是只看到功能摘要
 
 调研文档：`docs/software-engineering-research/`
+
+### 深读入口
+
+| 主题 | 文档 |
+|------|------|
+| 规划 / spec | `docs/software-engineering-research/plan.md` |
+| TDD | `docs/software-engineering-research/tdd.md` |
+| 调试 | `docs/software-engineering-research/debug.md` |
+| 审查 | `docs/software-engineering-research/review.md` |
+| 上下文 / 记忆 | `docs/software-engineering-research/context-memory.md` |
+| 其他方向取舍 | `docs/software-engineering-research/other-directions.md` |
 
 ## Refs
 
@@ -85,6 +113,7 @@ refs/
 | 前端 UI / 设计系统 | `google-labs-code/stitch-skills`, `nextlevelbuilder/ui-ux-pro-max-skill`, `pbakaus/impeccable`, `vercel-labs/agent-skills` |
 | 研发流程 / 项目管理 | `automazeio/ccpm`, `gsd-build/get-shit-done`, `obra/superpowers` |
 | 上下文 / 记忆管理 | `mksglu/context-mode`, `muratcankoylan/Agent-Skills-for-Context-Engineering` |
+| 最佳实践 / 知识库 | `shanraisshan/claude-code-best-practice` |
 | 技能集合与市场 | `anthropics/skills`, `Dimillian/Skills`, `affaan-m/everything-claude-code`, `glittercowboy/taches-cc-resources`, `libukai/awesome-agent-Skills`, `travisvn/awesome-claude-Skills` |
 | 代码质量 / 审查 | `millionco/react-doctor` |
 | MCP / 工具链 | `vercel-labs/skills` |

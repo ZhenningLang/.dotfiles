@@ -1,6 +1,7 @@
 ---
 name: agent-browser
 description: Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to "open a website", "fill out a form", "click a button", "take a screenshot", "scrape data from a page", "test this web app", "login to a site", "automate browser actions", or any task requiring programmatic web interaction.
+argument-hint: <URL|页面任务|自动化目标>
 allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 ---
 
@@ -45,6 +46,13 @@ agent-browser open https://example.com && agent-browser wait --load networkidle 
 ```
 
 **When to chain:** Use `&&` when you don't need to read the output of an intermediate command before proceeding (e.g., open + wait + screenshot). Run commands separately when you need to parse the output first (e.g., snapshot to discover refs, then interact using those refs).
+
+## Gotchas
+
+- 交互前先 `snapshot -i` 拿最新元素引用；DOM 变了还复用旧 `@e1` 很容易点错
+- 需要读取中间输出时不要盲目链式执行；先看结果再继续
+- 认证状态文件包含敏感会话信息，只能本地临时使用，并加入 `.gitignore`
+- browser automation 适合执行和取证，不替代业务判断；发现异常后仍要回到 `/se-debug`、`/se-review` 或 `/se-verify`
 
 ## Handling Authentication
 

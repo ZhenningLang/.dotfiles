@@ -1,6 +1,7 @@
 ---
 name: se-tdd
-description: TDD 工作流。适用于新功能开发、bug 修复、行为变更；用户明确说不要 TDD 时跳过。
+description: 新功能、修 bug、改行为前使用；先写失败测试再写实现，纯配置/文档/样式变更跳过。
+argument-hint: <功能点|bug 描述|行为变更>
 ---
 
 当任务属于以下场景时使用本 skill（除非用户明确说不要）：
@@ -38,6 +39,17 @@ REFACTOR → 消除重复、改名、提取（保持绿灯）
 - 一个测试一个概念
 - Mock 只在外部边界使用（fs/http/db），不 mock 内部纯函数
 - 提交模式：`test(scope): failing test` → `feat(scope): implement`
+
+## Gotchas
+
+- 先写实现、再补测试，不叫 TDD
+- 红灯必须因为“行为缺失/不符合预期”，不能只是 typo 或测试本身坏掉
+- UI 探索、样式调整、纯配置改动不要生搬硬套 TDD
+- GREEN 阶段只做让测试过的最小实现，不顺手优化、不顺手重构
+
+## 扩展阅读
+
+- `docs/software-engineering-research/tdd.md`
 
 ## 关联技能
 
