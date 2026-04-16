@@ -16,7 +16,7 @@ argument-hint: <文件/目录/留空=当前项目>
 不适用于以下场景：
 
 - 纯后端/CLI/非 UI 任务
-- 明确是功能 bug 定位，应该先 `/se-debug`
+- 明确是功能 bug 定位，应该先 `/dev-debug`
 - 明确是 React 运行时问题，应该优先结合 `react-doctor`
 
 ## 1. 确定范围
