@@ -130,10 +130,14 @@ if git -C "$CWD" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       printf "%b · \033[1;38;5;146m%s\033[0m%b%b${DIR_LINK}" "$SID_STR" "$BRANCH" "$PR_STR" "$USAGE_STR"
     fi
   else
-    printf "${OSC_START}vscode://file${CWD}${OSC_END}\033[1;38;5;66m%s\033[0m${OSC_START}${OSC_END}${SEP}\033[1;38;5;146m%s\033[0m${SEP}\033[1;38;5;214m%s\033[0m" "$SHORT_CWD" "$BRANCH" "$MODEL"
+    printf "${OSC_START}vscode://file${CWD}${OSC_END}\033[1;38;5;66m%s\033[0m${OSC_START}${OSC_END}${SEP}\033[1;38;5;146m%s\033[0m${SEP}\033[1;38;5;214m%s\033[0m%b%b" "$SHORT_CWD" "$BRANCH" "$MODEL" "$SID_STR" "$USAGE_STR"
   fi
 else
   SID_STR=""
   [ -n "$SHORT_SID" ] && SID_STR=" · \033[38;5;243m${SHORT_SID}\033[0m"
-  printf "%b%b${DIR_LINK}" "$SID_STR" "$USAGE_STR"
+  if [ "$IS_CC" = "0" ]; then
+    printf "%b%b${DIR_LINK}" "$SID_STR" "$USAGE_STR"
+  else
+    printf "${OSC_START}vscode://file${CWD}${OSC_END}\033[1;38;5;66m%s\033[0m${OSC_START}${OSC_END}${SEP}\033[1;38;5;214m%s\033[0m%b%b" "$SHORT_CWD" "$MODEL" "$SID_STR" "$USAGE_STR"
+  fi
 fi
