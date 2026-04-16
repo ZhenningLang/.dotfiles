@@ -79,3 +79,9 @@
 [submodule "refs/shanraisshan/claude-code-best-practice"]
 	path = refs/shanraisshan/claude-code-best-practice
 	url = https://github.com/shanraisshan/claude-code-best-practice.git
+[submodule "refs/tw93/Waza"]
+	path = refs/tw93/Waza
+	url = https://github.com/tw93/Waza.git
+[submodule "refs/tirth8205/code-review-graph"]
+	path = refs/tirth8205/code-review-graph
+	url = https://github.com/tirth8205/code-review-graph.git

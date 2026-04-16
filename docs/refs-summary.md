@@ -3,13 +3,13 @@
 ## 分类说明
 
 - **浏览器自动化与前端调试**：围绕浏览器控制、前端诊断、性能分析、页面抓取与 UI 调试。 代表项目：`ChromeDevTools/chrome-devtools-mcp`、`vercel-labs/agent-browser`
-- **技能集合与市场**：以 skills 汇总、分发、导航或精选集合为主，常附带少量示例或插件。 代表项目：`Dimillian/Skills`、`affaan-m/everything-claude-code`、`anthropics/skills`、`glittercowboy/taches-cc-resources`、`libukai/awesome-agent-Skills`、`travisvn/awesome-claude-Skills`
+- **技能集合与市场**：以 skills 汇总、分发、导航或精选集合为主，常附带少量示例或插件。 代表项目：`Dimillian/Skills`、`affaan-m/everything-claude-code`、`anthropics/skills`、`glittercowboy/taches-cc-resources`、`libukai/awesome-agent-Skills`、`travisvn/awesome-claude-Skills`、`tw93/Waza`
 - **多智能体协作与工作流编排**：围绕 agent 角色分工、并行执行、状态同步、团队工作流编排。 代表项目：`Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus`
 - **上下文 / 记忆管理**：围绕上下文压缩、记忆持久化、检索、session 连续性与 context engineering。 代表项目：`mksglu/context-mode`、`muratcankoylan/Agent-Skills-for-Context-Engineering`
 - **前端 UI / 设计系统**：围绕视觉设计、组件模式、设计系统、界面审查与 UI 生成。 代表项目：`google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills`
 - **研发流程 / 项目管理**：围绕 spec/planning/execution/verification/ship 等工程流程与项目管理。 代表项目：`automazeio/ccpm`、`gsd-build/get-shit-done`、`obra/superpowers`
 - **最佳实践 / 知识库**：围绕 Claude Code 概念地图、目录约定、功能导航与实践经验整理。 代表项目：`shanraisshan/claude-code-best-practice`
-- **代码质量 / 审查 / 调试**：围绕静态分析、review、质量门禁、调试与诊断。 代表项目：`millionco/react-doctor`、`addyosmani/web-quality-skills`
+- **代码质量 / 审查 / 调试**：围绕静态分析、review、质量门禁、调试与诊断。 代表项目：`millionco/react-doctor`、`addyosmani/web-quality-skills`、`tirth8205/code-review-graph`
 - **MCP / 工具链 / 安装分发**：围绕 MCP、CLI、安装器、技能包管理、多 Agent 兼容与基础设施。 代表项目：`vercel-labs/skills`
 - **行为协议 / 提示工程**：围绕提示协议、行为约束、激励/约束机制、触发词和 hook 协同。 代表项目：`tanweai/pua`
 - **Agent 配置管理 / 工具链**：围绕跨 Agent 统一配置、安装分发、二进制修改与工具增强。 代表项目：`notdp/.dotfiles`
@@ -40,7 +40,9 @@
 | [`pbakaus/impeccable`](./refs-details/pbakaus/impeccable.md) | 前端 UI / 设计系统 | 面向前端设计质量的跨平台技能/命令打包仓库，附带官网、下载 API 和构建系统。 |
 | [`shanraisshan/claude-code-best-practice`](./refs-details/shanraisshan/claude-code-best-practice.md) | 最佳实践 / 知识库 | Claude Code 生态知识库，系统整理 commands、skills、subagents、memory、hooks 与工作流最佳实践，并给出对应实现入口。 |
 | [`tanweai/pua`](./refs-details/tanweai/pua.md) | 行为协议 / 提示工程 | 面向多种 AI 编码代理的“高压/高主动性”技能包，核心是 PUA/PIP 风格提示、命令、hooks 和多平台分发素材。 |
+| [`tirth8205/code-review-graph`](./refs-details/tirth8205/code-review-graph.md) | 代码质量 / 审查 / 调试 | 面向 AI 编码工具的本地代码知识图谱，用 Tree-sitter、SQLite 与 MCP 把审查上下文缩到真正相关的 blast radius。 |
 | [`travisvn/awesome-claude-Skills`](./refs-details/travisvn/awesome-claude-Skills.md) | 技能集合与市场 | 纯 curated list 仓库，汇总官方和社区 Claude Skills、教程、资源、安全建议与 FAQ。 |
+| [`tw93/Waza`](./refs-details/tw93/Waza.md) | 技能集合与市场 | 轻量但完整的工程习惯 skill pack，把 think/design/check/hunt/write/learn/read/health 八类动作打包成可安装 skills，并附带 statusline 与 English Coaching。 |
 | [`vercel-labs/agent-browser`](./refs-details/vercel-labs/agent-browser.md) | 浏览器自动化与前端调试 | 原生 Rust 驱动的浏览器自动化 CLI，并附带多套面向 AI 代理的技能文档。 |
 | [`vercel-labs/agent-skills`](./refs-details/vercel-labs/agent-skills.md) | 前端 UI / 设计系统 | Vercel 出品的技能集合，覆盖 React/React Native、组合模式、UI 评审与 Vercel 部署。 |
 | [`vercel-labs/skills`](./refs-details/vercel-labs/skills.md) | MCP / 工具链 / 安装分发 | 开放 Agent Skills 生态的 CLI/包管理器，用于发现、安装、列出、删除、更新技能，并维护多代理兼容性。 |
@@ -49,7 +51,7 @@
 
 ## 最近 14 天更新速览（2026-03-31 ~ 2026-04-14）
 
-- [事实] 范围：顶层 `.gitmodules` 中的 27 个 submodule。
+- [事实] 范围：顶层 `.gitmodules` 中的 29 个 submodule。
 - [事实] 数据来源：各仓库默认分支最近 14 天的 `git log`；需要联网的仓库已先执行 `git fetch --all --tags --prune`。
 - [事实] 下表里的提交数按默认分支统计。
 - [推断] “新增/变化”列是根据 commit 标题与改动文件归纳，不等同于完整 release notes。
@@ -59,6 +61,7 @@
 | [`affaan-m/everything-claude-code`](./refs-details/affaan-m/everything-claude-code.md) | 324 | [推断] 新增 dashboard GUI、gateguard pre-action gate 与 ecc2 legacy 配置导入迁移，随后集中修补安装、发布、权限与并发问题。 |
 | [`Yeachan-Heo/oh-my-claudecode`](./refs-details/Yeachan-Heo/oh-my-claudecode.md) | 296 | [推断] HUD 新增花费/Provider/worktree/hostname/cwd 等信息展示，release skill 改写为 repo-aware assistant，引入 LLM Wiki 知识层，并持续强化 permission/runtime/hook/tmux/Ralph 审批链。 |
 | [`gsd-build/get-shit-done`](./refs-details/gsd-build/get-shit-done.md) | 194 | [推断] 新增 `/gsd-graphify` 知识图谱、typed query 基础、worktree 健康检查、milestone seed 扫描、线程/快捷命令管理与更强的 TDD/审计/安全门禁。 |
+| [`tw93/Waza`](./refs-details/tw93/Waza.md) | 186 | [推断] 两周内高频迭代八个核心 skill 与安装资产：新增 statusline、English Coaching、`read`/`learn` 外部检索支持，持续强化 `design`/`health`/`check`/`write`，并反复修补 Codex、marketplace、verify-skills 与 macOS 兼容性问题。 |
 | [`pbakaus/impeccable`](./refs-details/pbakaus/impeccable.md) | 141 | [推断] 新增 `skills check`、skip-if-up-to-date 更新逻辑与 cleanup 脚本，整理 skill 版图（21→18），上线 Chrome 扩展并持续扩展 UI anti-pattern 检测与站点渲染能力。 |
 | [`mksglu/context-mode`](./refs-details/mksglu/context-mode.md) | 114 | [推断] 连续发布 `1.0.79`~`1.0.88`，新增 `ctx-insight` skill 与个人 analytics dashboard/工具链，并补强 search、upgrade 与 CI 稳定性。 |
 | [`notdp/hive`](./refs-details/notdp/hive.md) | 69 | [推断] 新增 send gate、`hive register`、delivery ACK、frontmatter 化的 HIVE envelope，以及跨 `droid`/`claude`/`codex` 的 hooks 安装与更顺手的 spawn/fork/kill 工作流。 |
@@ -73,6 +76,7 @@
 | [`obra/superpowers`](./refs-details/obra/superpowers.md) | 3 | [事实] 近 14 天提交主要是仓库入口维护（Discord 链接/公告），未见明确功能新增。 |
 | [`shanraisshan/claude-code-best-practice`](./refs-details/shanraisshan/claude-code-best-practice.md) | 0 | [事实] 默认分支近 14 天无新提交；当前一次可见提交落在 `2026-04-15`，不在本统计窗口内。 |
 | [`glittercowboy/taches-cc-resources`](./refs-details/glittercowboy/taches-cc-resources.md) | 1 | [事实] 新增 `the-pirate-bay` skill。 |
+| [`tirth8205/code-review-graph`](./refs-details/tirth8205/code-review-graph.md) | 1 | [事实] 近 14 天仅见 1 个提交，主要是为 sort key 同时抑制 `mypy` 的 `arg-type` 与 `return-value` 诊断。 |
 | [`nextlevelbuilder/ui-ux-pro-max-skill`](./refs-details/nextlevelbuilder/ui-ux-pro-max-skill.md) | 1 | [推断] 主要变化是设计系统视觉改进合并。 |
 | [`tanweai/pua`](./refs-details/tanweai/pua.md) | 1 | [事实] 近 14 天提交主要是微信群二维码与缓存版本更新，未见明确功能新增。 |
 | [`vercel-labs/agent-skills`](./refs-details/vercel-labs/agent-skills.md) | 1 | [推断] 主要变化是继续打磨 `react-view-transition` skill。 |
@@ -102,7 +106,8 @@
 - `Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus` 属于多智能体/多模型协作平台型项目。
 - `mksglu/context-mode` 与 `muratcankoylan/Agent-Skills-for-Context-Engineering` 更适合归入上下文工程/记忆管理范畴。
 - `automazeio/ccpm`、`gsd-build/get-shit-done`、`obra/superpowers` 更偏工程流程与项目执行方法学。
+- `tw93/Waza` 是更轻的工程习惯技能包：不追求重型 runtime 或全流程治理，而是把 think/check/hunt/design/read/write/learn/health 八类高频动作压成可安装 skill。
 - `shanraisshan/claude-code-best-practice` 更像 Claude Code 生态知识库/导航站，适合提炼 skill 触发器、command 路由与全局记忆压缩原则，不适合整套照搬为团队规范。
 - `google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills` 更偏前端 UI / 设计系统。
-- `millionco/react-doctor` 与 `addyosmani/web-quality-skills` 都属于代码质量/审查范畴，前者偏 React 代码体检，后者偏 Lighthouse / CWV / a11y / SEO 的 Web 质量审查。
+- `millionco/react-doctor`、`addyosmani/web-quality-skills`、`tirth8205/code-review-graph` 都属于代码质量/审查范畴：前者偏 React 代码体检，第二个偏 Lighthouse / CWV / a11y / SEO 的 Web 质量审查，后者偏本地结构图谱、blast radius 与 token-efficient review context。
 - `tanweai/pua` 和 `HughYau/qiushi-skill` 都属于行为协议/提示工程类，前者偏高压激励/行为约束，后者偏哲学方法论/分析框架，二者互补。
