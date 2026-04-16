@@ -16,7 +16,25 @@ OSC_END='\033\\'
 
 # --- Factory usage + plan (stale-while-revalidate, 600s TTL) ---
 USAGE_CACHE="/tmp/droid_statusline_usage"
+LAST_GOOD_USAGE_CACHE="${USAGE_CACHE}.last_good"
 USAGE_STR=""
+_has_valid_usage_data() {
+  [ -f "$1" ] && [ -s "$1" ] || return 1
+  jq -e '
+    (.usage.standard.totalAllowance // 0) > 0 and
+    (.schedule | type == "array") and
+    (.schedule | length > 0) and
+    ((.schedule[0].plan.name // "") | length > 0)
+  ' "$1" >/dev/null 2>&1
+}
+_store_last_good_usage_cache() {
+  _has_valid_usage_data "$1" || return 1
+  cp -f "$1" "$LAST_GOOD_USAGE_CACHE" 2>/dev/null
+}
+_restore_last_good_usage_cache() {
+  _has_valid_usage_data "$LAST_GOOD_USAGE_CACHE" || return 1
+  cp -f "$LAST_GOOD_USAGE_CACHE" "$USAGE_CACHE" 2>/dev/null
+}
 _fetch_usage() {
   local tok tmp
   # Try auth.v2 (AES-256-GCM encrypted) first, fall back to legacy auth.encrypted
@@ -37,20 +55,30 @@ _fetch_usage() {
     -H "Authorization: Bearer $tok" \
     -H "Content-Type: application/json" -H "X-Factory-Client: cli" \
     -o "$tmp" 2>/dev/null
-  if [ -s "$tmp" ] && head -c1 "$tmp" | grep -q '{'; then
+  if _has_valid_usage_data "$tmp"; then
     mv -f "$tmp" "$USAGE_CACHE"
+    _store_last_good_usage_cache "$USAGE_CACHE"
   else
     rm -f "$tmp"
   fi
 }
+if _has_valid_usage_data "$USAGE_CACHE"; then
+  _store_last_good_usage_cache "$USAGE_CACHE"
+elif [ -f "$USAGE_CACHE" ] && [ -s "$USAGE_CACHE" ]; then
+  _restore_last_good_usage_cache
+fi
 if [ -f "$USAGE_CACHE" ] && [ -s "$USAGE_CACHE" ]; then
   CACHE_AGE=$(( $(date +%s) - $(stat -f %m "$USAGE_CACHE" 2>/dev/null || echo 0) ))
   [ "$CACHE_AGE" -ge 600 ] && _fetch_usage &
 else
   _fetch_usage
 fi
-if [ -f "$USAGE_CACHE" ] && [ -s "$USAGE_CACHE" ]; then
+if _has_valid_usage_data "$USAGE_CACHE"; then
   USAGE_DATA=$(cat "$USAGE_CACHE")
+elif _has_valid_usage_data "$LAST_GOOD_USAGE_CACHE"; then
+  USAGE_DATA=$(cat "$LAST_GOOD_USAGE_CACHE")
+fi
+if [ -n "$USAGE_DATA" ]; then
   USED=$(echo "$USAGE_DATA" | jq -r '.usage.standard.orgTotalTokensUsed // 0' 2>/dev/null)
   TOTAL=$(echo "$USAGE_DATA" | jq -r '.usage.standard.totalAllowance // 0' 2>/dev/null)
   END_MS=$(echo "$USAGE_DATA" | jq -r '.usage.endDate // 0' 2>/dev/null)

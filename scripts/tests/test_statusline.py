@@ -10,6 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "statusline.sh"
 USAGE_CACHE = Path("/tmp/droid_statusline_usage")
+LAST_GOOD_USAGE_CACHE = Path("/tmp/droid_statusline_usage.last_good")
 USAGE_FIXTURE = {
     "usage": {
         "standard": {
@@ -26,8 +27,6 @@ USAGE_FIXTURE = {
         }
     ],
 }
-
-
 def strip_control_sequences(value: str) -> str:
     value = re.sub(r"\x1b]8;;.*?\x1b\\\\", "", value)
     value = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", value)
@@ -37,6 +36,9 @@ def strip_control_sequences(value: str) -> str:
 class StatuslineTests(unittest.TestCase):
     def setUp(self) -> None:
         self._previous_usage_cache = USAGE_CACHE.read_text() if USAGE_CACHE.exists() else None
+        self._previous_last_good_usage_cache = (
+            LAST_GOOD_USAGE_CACHE.read_text() if LAST_GOOD_USAGE_CACHE.exists() else None
+        )
         USAGE_CACHE.write_text(json.dumps(USAGE_FIXTURE))
 
     def tearDown(self) -> None:
@@ -44,6 +46,10 @@ class StatuslineTests(unittest.TestCase):
             USAGE_CACHE.unlink(missing_ok=True)
         else:
             USAGE_CACHE.write_text(self._previous_usage_cache)
+        if self._previous_last_good_usage_cache is None:
+            LAST_GOOD_USAGE_CACHE.unlink(missing_ok=True)
+        else:
+            LAST_GOOD_USAGE_CACHE.write_text(self._previous_last_good_usage_cache)
 
     def test_cc_mode_keeps_session_and_usage_visible(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -85,6 +91,54 @@ class StatuslineTests(unittest.TestCase):
             self.assertIn("12345678", output)
             self.assertIn("Pro", output)
             self.assertIn("1.5/10M", output)
+
+    def test_refresh_keeps_last_good_cache_when_api_returns_error_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            factory_dir = Path(tmp) / ".factory"
+            factory_dir.mkdir()
+            (factory_dir / "auth.encrypted").write_text(json.dumps({"access_token": "dummy-token"}))
+
+            fakebin_dir = Path(tmp) / "fakebin"
+            fakebin_dir.mkdir()
+            (fakebin_dir / "curl").write_text(
+                """#!/bin/sh
+out=""
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "-o" ]; then
+    out="$2"
+    shift 2
+    continue
+  fi
+  shift
+done
+printf '%s' '{"error":{"code":"403","message":"Forbidden"}}' > "$out"
+"""
+            )
+            os.chmod(fakebin_dir / "curl", 0o755)
+
+            LAST_GOOD_USAGE_CACHE.unlink(missing_ok=True)
+            USAGE_CACHE.write_text(json.dumps(USAGE_FIXTURE))
+            stale_time = USAGE_CACHE.stat().st_mtime - 601
+            os.utime(USAGE_CACHE, (stale_time, stale_time))
+
+            payload = {
+                "cwd": tmp,
+                "session_id": "deadbeef-1234",
+                "model": {"display_name": "GPT-5.4"},
+            }
+            subprocess.run(
+                ["bash", str(SCRIPT)],
+                input=json.dumps(payload),
+                text=True,
+                capture_output=True,
+                check=True,
+                env={**os.environ, "HOME": tmp, "PATH": f"{fakebin_dir}:{os.environ['PATH']}"},
+            )
+
+            subprocess.run(["sleep", "0.2"], check=True)
+
+            self.assertEqual(json.loads(USAGE_CACHE.read_text()), USAGE_FIXTURE)
+            self.assertEqual(json.loads(LAST_GOOD_USAGE_CACHE.read_text()), USAGE_FIXTURE)
 
 
 if __name__ == "__main__":
