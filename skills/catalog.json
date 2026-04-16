@@ -1,0 +1,148 @@
+{
+  "skills": [
+    {
+      "name": "agent-browser",
+      "path": "skills/agent-browser",
+      "domain": "web",
+      "role": "brand-exception"
+    },
+    {
+      "name": "hive",
+      "path": "skills/hive",
+      "domain": "team",
+      "role": "brand-exception"
+    },
+    {
+      "name": "react-doctor",
+      "path": "skills/react-doctor",
+      "domain": "ui",
+      "role": "brand-exception"
+    },
+    {
+      "name": "readable-rewrite",
+      "path": "skills/readable-rewrite",
+      "domain": "readable",
+      "role": "canonical"
+    },
+    {
+      "name": "web-read",
+      "path": "skills/web-read",
+      "domain": "web",
+      "role": "canonical"
+    },
+    {
+      "name": "agent-health",
+      "path": "skills/agent-health",
+      "domain": "agent",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-check",
+      "path": "skills/guard-check",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "fe-ui-design",
+      "path": "skills/fe-ui-design",
+      "domain": "fe",
+      "role": "canonical"
+    },
+    {
+      "name": "think-architecture",
+      "path": "skills/think-architecture",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-close",
+      "path": "skills/guard-close",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "dev-debug",
+      "path": "skills/dev-debug",
+      "domain": "dev",
+      "role": "canonical"
+    },
+    {
+      "name": "think-map",
+      "path": "skills/think-map",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "think-plan",
+      "path": "skills/think-plan",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "think-quality",
+      "path": "skills/think-quality",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "readable-metrics",
+      "path": "skills/readable-metrics",
+      "domain": "readable",
+      "role": "canonical"
+    },
+    {
+      "name": "dev-refactor",
+      "path": "skills/dev-refactor",
+      "domain": "dev",
+      "role": "canonical"
+    },
+    {
+      "name": "think-research",
+      "path": "skills/think-research",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-review",
+      "path": "skills/guard-review",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-secure",
+      "path": "skills/guard-secure",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-ship",
+      "path": "skills/guard-ship",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "dev-tdd",
+      "path": "skills/dev-tdd",
+      "domain": "dev",
+      "role": "canonical"
+    },
+    {
+      "name": "think-unstuck",
+      "path": "skills/think-unstuck",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-verify",
+      "path": "skills/guard-verify",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
+      "name": "assist-learn",
+      "path": "skills/assist-learn",
+      "domain": "assist",
+      "role": "canonical"
+    }
+  ]
+}

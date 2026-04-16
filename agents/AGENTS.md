@@ -67,10 +67,26 @@
 
 ### 质量与验证
 
-- **TDD 强制**：新功能、bug 修复、行为变更时，必须先调用 `/se-tdd` skill，走 Red→Green→Refactor 循环。先写失败测试再写实现，不是"写完实现补测试"。纯配置/文档/样式变更除外。
+- **TDD 强制**：新功能、bug 修复、行为变更时，必须先调用 `/dev-tdd` skill，走 Red→Green→Refactor 循环。先写失败测试再写实现，不是"写完实现补测试"。纯配置/文档/样式变更除外。
 - 开发后思考是否需要小范围重构，重构的基础是良好的测试
 - 验证比生成贵：定义"什么是正确的"是核心工作，写代码不是
 - 故障导向安全：校验失败应阻止而非放行，错误不应静默传递
+
+### Skill 路由总览
+
+- `think-*`：理解问题、调研、架构、规划、结构判断、卡住排查
+- `dev-*`：调试、TDD、重构
+- `guard-*`：review、secure、verify、ship、close、check（交付前总入口）
+- `readable-*`：可读性重写、指标表达
+- `assist-*`：经验沉淀；`fe-*` / `web-*` / `agent-*` / `hive` / `react-doctor` 处理专项能力
+
+常见工作流：
+
+- 新需求 / 大改动：`/think-map` → `/think-plan` → `/dev-tdd` → `/guard-verify` → `/guard-ship`
+- Bug / 异常：`/dev-debug` → （必要时 `/dev-tdd` / `/dev-refactor`）→ `/guard-verify`
+- 交付前总检查：`/guard-check` → 按需路由到 `/guard-review` / `/guard-secure` / `/guard-verify` / `/guard-ship`
+- 外链调研：`/web-read` → `/think-research` → `/think-plan`
+- 表达太绕：`/readable-rewrite`；指标展示：`/readable-metrics`
 
 ### 行为准则
 
@@ -99,7 +115,7 @@
 三条红线：
 - 闭环验证：声称完成前必须跑验证命令并贴出输出，无证据的完成不接受
 - 事实驱动：归因环境/版本/依赖前必须用工具验证，未验证的归因不接受
-- 穷尽方案：声称无法解决前必须完成结构化排查（见 `/se-unstuck`），未穷尽不接受
+- 穷尽方案：声称无法解决前必须完成结构化排查（见 `/think-unstuck`），未穷尽不接受
 
 能动性：
 
@@ -110,4 +126,4 @@
 | 信息不足 | 问用户 | 先用工具自查 |
 | 发现隐患 | 忽略 | 主动提出+给方案 |
 
-连续失败 2 次时，调用 `/se-unstuck` 进入结构化排查模式。
+连续失败 2 次时，调用 `/think-unstuck` 进入结构化排查模式。

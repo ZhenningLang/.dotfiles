@@ -52,7 +52,7 @@ agent-browser open https://example.com && agent-browser wait --load networkidle 
 - 交互前先 `snapshot -i` 拿最新元素引用；DOM 变了还复用旧 `@e1` 很容易点错
 - 需要读取中间输出时不要盲目链式执行；先看结果再继续
 - 认证状态文件包含敏感会话信息，只能本地临时使用，并加入 `.gitignore`
-- browser automation 适合执行和取证，不替代业务判断；发现异常后仍要回到 `/se-debug`、`/se-review` 或 `/se-verify`
+- browser automation 适合执行和取证，不替代业务判断；发现异常后仍要回到 `/dev-debug`、`/guard-review` 或 `/guard-verify`
 
 ## Handling Authentication
 

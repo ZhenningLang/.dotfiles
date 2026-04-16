@@ -21,6 +21,6 @@ Run after making changes to catch issues early. Fix errors first, then re-run to
 
 ## Gotchas
 
-- React Doctor 是体检工具，不替代 `/se-debug`、`/se-review` 或 `/se-verify`
+- React Doctor 是体检工具，不替代 `/dev-debug`、`/guard-review` 或 `/guard-verify`
 - 先修高置信度错误，再看分数；不要为了分数倒逼无意义改动
 - 结果要结合当前 diff 和业务上下文判断，不要机械接受每条建议
