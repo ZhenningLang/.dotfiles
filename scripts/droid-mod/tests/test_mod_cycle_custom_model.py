@@ -8,57 +8,53 @@ from pathlib import Path
 
 SCRIPT = Path("/Users/zhenninglang/.dotfiles/scripts/droid-mod/mods/mod_cycle_custom_model.py")
 STATUS = Path("/Users/zhenninglang/.dotfiles/scripts/droid-mod/status.py")
-DIRECT_CALLBACK_MARKER = (
-    b'GR().getCustomModels().map((gA)=>gA.id);'
-    b"if(RR.length<=1)return;"
-)
-FILTERED_DIRECT_CALLBACK_MARKER = (
-    b'GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
-    b"if(RR.length<=1)return;"
-)
-COMPACT_FILTERED_CALLBACK_TAIL = (
-    b'let oR=VT();if(gA=RR[(RR.indexOf(oR.hasSpecModeModel()?oR.getSpecModeModel():oR.getModel())+1)%RR.length])Yk(gA)'
-)
-SUPER_COMPACT_CALLBACK_MARKER = (
-    b'let RR=jG.filter(g=>!g.includes("[")),o=VT();'
-)
-SUPER_COMPACT_CALLBACK_TAIL = (
-    b'RR[1]&&HV(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
-)
-BROKEN_SUPER_COMPACT_CALLBACK_MARKER = (
-    b'let RR=Y8A().filter(g=>!g.includes("[")),o=VT();'
-)
-BROKEN_SUPER_COMPACT_CALLBACK_TAIL = (
-    b'RR[1]&&Yk(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
-)
-CURRENT_SUPER_COMPACT_CALLBACK_MARKER = (
-    b'let RR=lw.filter(g=>!g.includes("[")),o=VT();'
-)
-ORIGINAL_CALLBACK_BYTES = (
-    b"fu=M9.useCallback(()=>{if(jG.length<=1)return;let PA=QZ().getModelPolicy();if(!jG.some((g)=>AB(g,PA).allowed))return;SW((x)=>!x)},[jG]),"
-    b"HV=M9.useCallback(async(RR)=>{return RR},[AA])"
+
+
+# 真实 0.103.0 二进制里 mT1 (basic ModelSelector) 的 list builder 工厂区原文
+MT1_ORIGINAL = (
+    b'JH.push({type:"header",label:K("common:modelSelector.factoryModelsHeader")});'
+    b'let PH=p.map((UH)=>{let QH=fF(UH,M);return{type:"model",id:UH,disabled:!QH.allowed}}),'
+    b'MH=n.map((UH)=>{let QH=fF(UH,M);return{type:"model",id:UH,disabled:!QH.allowed}}),'
+    b'CH=g.map((UH)=>{let QH=fF(UH.id,M,UH);return{type:"model",id:UH.id,disabled:!QH.allowed}});'
+    b'if(JH.push(...PH),n.length>0)JH.push({type:"toggle-builtins",expanded:N,hiddenCount:n.length});'
+    b'if(N)JH.push(...MH);'
+    b'if(CH.length>0)JH.push({type:"sep"}),'
+    b'JH.push({type:"header",label:K("common:modelSelector.customModelsHeader")}),'
+    b'JH.push(...CH);'
 )
 
-BROKEN_PATCHED_BYTES = (
-    b"peekNextCycleModel(H,T){H=this.customModels.map(m=>m.id);if(H.length===0)return null;let R=T??this.getModel(),A=H.indexOf(R),B=A===-1?0:A;"
-    b"for(let D=1;D<=H.length;D++){let C=(B+D)%H.length,I=H[C];/*            */try{let O=PJ(I);return{modelId:I,effort:O}}catch{continue}}return null}"
-    b"cycleModel(H,T){let R=this.peekNextCycleModel(H,T);if(!R)return T??this.getModel();return this.setModel(R.modelId,R.effort),R.modelId}"
-    b"peekNextCycleSpecModeModel(H,T){H=this.customModels.map(m=>m.id);if(H.length===0)return null;let R=T??this.getSpecModeModel(),A=H.indexOf(R),B=A===-1?0:A;"
-    b"for(let D=1;D<=H.length;D++){let C=(B+D)%H.length,I=H[C];/*            */try{let O=PJ(I);return{modelId:I,effort:O}}catch{continue}}return null}"
-    b"cycleSpecModeModel(H){H=this.customModels.map(m=>m.id);if(H.length===0)return this.getSpecModeModel();let T=this.getSpecModeModel(),R=H.indexOf(T),A=R===-1?0:R;"
-    b"for(let B=1;B<=H.length;B++){let D=(A+B)%H.length,C=H[D];/*            */try{let $=PJ(C);return this.setSpecModeModel(C,$),C}catch{continue}}return T}"
-    b"ul=K9.useCallback(()=>{let BR=GR().peekNextCycleModel(Y8A(),VT().hasSpecModeModel()?VT().getSpecModeModel():VT().getModel());if(BR)Yk(BR.modelId)},[lw]),"
-    b"Yk=K9.useCallback(async(RR)=>{DL(!1);let oR=VT();if(oR.isSpecMode()&&oR.hasSpecModeModel()){let JB=oR.getSpecModeModel();if(RR===JB)return;"
-    b"let xL=OB(RR).defaultReasoningEffort,JL=await g2(RR,xL);if(!JL.success)return;if(wI({specModeModelId:RR,specModeReasoningEffort:xL,interactionMode:oR.getInteractionMode()}),JL.compactionPerformed)O9()}"
-    b"else{let JB=oR.getModel();if(RR===JB)return;let xL=OB(RR).defaultReasoningEffort,JL=await hU(RR,xL);if(!JL.success)return;if(wI({modelId:RR,reasoningEffort:xL}),JL.compactionPerformed)O9()}},[hU,g2,wI])"
+# 真实 0.103.0 里 iT1 (tabbed/mission ModelSelector) 的 list builder 工厂区原文
+IT1_ORIGINAL = (
+    b'JT.push({type:"header",label:bH?t("common:missionModelPicker.recommendedHeader"):'
+    b't("common:modelSelector.factoryModelsHeader")});'
+    b'let GR=sH.map((ER)=>{let WR=fF(ER,YH);return{type:"model",id:ER,disabled:!WR.allowed}}),'
+    b'uR=rH.map((ER)=>{let WR=fF(ER,YH);return{type:"model",id:ER,disabled:!WR.allowed}}),'
+    b'eT=xH.map((ER)=>{let WR=fF(ER.id,YH,ER);return{type:"model",id:ER.id,disabled:!WR.allowed}});'
+    b'if(JT.push(...GR),rH.length>0)JT.push({type:"sep"}),'
+    b'JT.push({type:"toggle-builtins",expanded:kH,hiddenCount:rH.length});'
+    b'if(kH)JT.push(...uR);'
+    b'if(eT.length>0)JT.push({type:"sep"}),'
+    b'JT.push({type:"header",label:t("common:modelSelector.customModelsHeader")}),'
+    b'JT.push(...eT);'
 )
 
-CURRENT_BROKEN_CALLBACK_BYTES = (
-    b"ul=K9.useCallback(()=>{let RR=GR().peekNextCycleModel(lw,VT().hasSpecModeModel()?VT().getSpecModeModel():null);if(RR)Yk(RR.modelId)},[lw]),"
-    b"Yk=K9.useCallback(async(RR)=>{DL(!1);let oR=VT();if(oR.isSpecMode()&&oR.hasSpecModeModel()){let JB=oR.getSpecModeModel();if(RR===JB)return;"
-    b"let xL=OB(RR).defaultReasoningEffort,JL=await g2(RR,xL);if(!JL.success)return;if(wI({specModeModelId:RR,specModeReasoningEffort:xL,interactionMode:oR.getInteractionMode()}),JL.compactionPerformed)O9()}"
-    b"else{let JB=oR.getModel();if(RR===JB)return;let xL=OB(RR).defaultReasoningEffort,JL=await hU(RR,xL);if(!JL.success)return;if(wI({modelId:RR,reasoningEffort:xL}),JL.compactionPerformed)O9()}},[hU,g2,wI])"
+MT1_CORE = (
+    b'JH.push(...g.map((UH)=>{let QH=fF(UH.id,M,UH);'
+    b'return{type:"model",id:UH.id,disabled:!QH.allowed}}));'
 )
+IT1_CORE = (
+    b'JT.push(...xH.map((ER)=>{let WR=fF(ER.id,YH,ER);'
+    b'return{type:"model",id:ER.id,disabled:!WR.allowed}}));'
+)
+
+# 真实 0.103.0 里 tw=Yd() 所在的唯一 anchor
+TW_ANCHOR_ORIGINAL = (
+    b',tw=Yd(),$_=!wR().hasAnyAvailableModel(tw),'
+)
+TW_ANCHOR_PATCHED = (
+    b',tw=wR().getCustomModels().map(m=>m.id),$_=!wR().hasAnyAvailableModel(tw),'
+)
+TW_CORE = b'tw=wR().getCustomModels().map(m=>m.id)'
 
 
 def _write_droid(home: Path, data: bytes) -> Path:
@@ -81,66 +77,92 @@ def _run(script: Path, home: Path) -> subprocess.CompletedProcess[str]:
 
 
 class ModCycleCustomModelTests(unittest.TestCase):
-    def test_patches_original_callback_with_shorter_filtered_cycle_logic(self) -> None:
+    def test_patches_all_three_sites_mt1_it1_and_tw(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             home = Path(tmpdir)
-            droid = _write_droid(home, ORIGINAL_CALLBACK_BYTES)
+            original = (
+                MT1_ORIGINAL + b"...filler..." + IT1_ORIGINAL + b"...filler..." + TW_ANCHOR_ORIGINAL
+            )
+            droid = _write_droid(home, original)
 
             result = _run(SCRIPT, home)
-
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            patched = droid.read_bytes()
-            self.assertIn(SUPER_COMPACT_CALLBACK_MARKER, patched)
-            self.assertIn(SUPER_COMPACT_CALLBACK_TAIL, patched)
-            self.assertLessEqual(len(patched) - len(ORIGINAL_CALLBACK_BYTES), 32)
 
+            patched = droid.read_bytes()
+
+            # mT1+iT1 是 +0 byte（通过 padding）；tw 是 +31 byte
+            self.assertEqual(len(patched) - len(original), 31)
+
+            # 三处都注入了 core 标记
+            self.assertIn(MT1_CORE, patched)
+            self.assertIn(IT1_CORE, patched)
+            self.assertIn(TW_CORE, patched)
+
+            # 工厂区 header / toggle-builtins / 原 tw=Yd() 已不再出现
+            self.assertNotIn(b'common:modelSelector.factoryModelsHeader', patched)
+            self.assertNotIn(b'common:modelSelector.customModelsHeader', patched)
+            self.assertNotIn(b'common:missionModelPicker.recommendedHeader', patched)
+            self.assertNotIn(b'toggle-builtins', patched)
+            self.assertNotIn(b',tw=Yd(),', patched)
+            self.assertIn(TW_ANCHOR_PATCHED, patched)
+
+            # 留下了至少两段较长的 /* spaces */ padding 供 comp_universal 消费
+            import re as _re
+            paddings = sorted(
+                len(m.group(1)) for m in _re.finditer(rb'/\*( +)\*/', patched)
+            )
+            self.assertGreaterEqual(len(paddings), 2)
+            self.assertGreaterEqual(paddings[-1], 400, f'padding sizes={paddings}')
+
+            # status 报告 modified
             status = _run(STATUS, home)
             self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
             self.assertIn("mod-cycle-custom-model: 已修改", status.stdout)
 
-    def test_repairs_broken_patch_and_status_detects_it(self) -> None:
+    def test_idempotent_on_already_patched_binary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             home = Path(tmpdir)
-            droid = _write_droid(home, BROKEN_PATCHED_BYTES)
+            droid = _write_droid(home, MT1_ORIGINAL + IT1_ORIGINAL + TW_ANCHOR_ORIGINAL)
 
-            result = _run(SCRIPT, home)
+            first = _run(SCRIPT, home)
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            after_first = droid.read_bytes()
 
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            patched = droid.read_bytes()
-            self.assertNotEqual(patched, BROKEN_PATCHED_BYTES)
-            self.assertEqual(patched.count(b"this.customModels.map(m=>m.id)"), 0)
-            self.assertEqual(patched.count(b"validateModelAccess("), 3)
-            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_MARKER, patched)
-            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_TAIL, patched)
-            self.assertNotIn(
-                b"peekNextCycleModel(lw,VT().hasSpecModeModel()?VT().getSpecModeModel():null)",
-                patched,
-            )
-            self.assertNotIn(b"if(BR)Yk(BR.modelId)", patched)
+            second = _run(SCRIPT, home)
+            self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+            self.assertIn("已应用", second.stdout)
+            self.assertEqual(droid.read_bytes(), after_first)
 
-            rerun = _run(SCRIPT, home)
-            self.assertEqual(rerun.returncode, 0, rerun.stdout + rerun.stderr)
-            self.assertIn("已应用", rerun.stdout)
-
-            status = _run(STATUS, home)
-            self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
-            self.assertIn("mod-cycle-custom-model: 已修改", status.stdout)
-
-    def test_repairs_current_lw_based_callback(self) -> None:
+    def test_incremental_apply_tw_only_when_mt1_it1_already_patched(self) -> None:
+        """真实场景：mT1/iT1 已 patch（旧版本），tw 新增。"""
         with tempfile.TemporaryDirectory() as tmpdir:
             home = Path(tmpdir)
-            droid = _write_droid(home, CURRENT_BROKEN_CALLBACK_BYTES)
+            # 构造一个“mT1/iT1 已替换成 core + padding, tw 仍是原样”的半成品
+            mt1_applied = MT1_CORE + b'/*' + b' ' * 20 + b'*/'
+            it1_applied = IT1_CORE + b'/*' + b' ' * 20 + b'*/'
+            original = (
+                mt1_applied + b"...filler..." + it1_applied + b"...filler..." + TW_ANCHOR_ORIGINAL
+            )
+            droid = _write_droid(home, original)
 
             result = _run(SCRIPT, home)
-
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
             patched = droid.read_bytes()
-            self.assertIn(CURRENT_SUPER_COMPACT_CALLBACK_MARKER, patched)
-            self.assertIn(BROKEN_SUPER_COMPACT_CALLBACK_TAIL, patched)
-            self.assertNotIn(
-                b"peekNextCycleModel(lw,VT().hasSpecModeModel()?VT().getSpecModeModel():null)",
-                patched,
-            )
+            # mT1/iT1 未被二次修改；tw 已切换
+            self.assertIn(mt1_applied, patched)
+            self.assertIn(it1_applied, patched)
+            self.assertIn(TW_CORE, patched)
+            self.assertNotIn(b',tw=Yd(),', patched)
+
+    def test_fails_loudly_when_pattern_not_found(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            _write_droid(home, b"random bytes with no selector pattern at all")
+
+            result = _run(SCRIPT, home)
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("pattern not found", result.stdout)
 
 
 if __name__ == "__main__":

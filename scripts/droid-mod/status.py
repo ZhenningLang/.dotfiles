@@ -12,112 +12,32 @@ with open(droid, 'rb') as f:
 
 results = {}
 
-# mod-hide-command-truncation: 截断条件
-# 用 isTruncated 定位截断函数（不依赖混淆后的函数名）
-# 原版: if(!V&&!V)return{text:V,isTruncated:!1}
-# 修改: if(!0||!V)return{text:V,isTruncated:!1}
-# 补偿后: ;/* ... */return{text:V,isTruncated:!1} (死代码被替换)
-if b'if(!0||!' in data:
-    results['mod-hide-command-truncation'] = 'modified'
-elif re.search(rb'/\*\s+\*/return\{text:' + V + rb',isTruncated:!1\}', data):
-    results['mod-hide-command-truncation'] = 'modified'
-elif re.search(rb'if\(!' + V + rb'&&!' + V + rb'\)return\{text:' + V + rb',isTruncated:!1\}', data):
-    results['mod-hide-command-truncation'] = 'original'
-else:
-    results['mod-hide-command-truncation'] = 'unknown'
+# 已归档（不再参与状态检测）: mod-hide-command-truncation, mod-expand-diff-lines
+# 归档文件: mods/_archive/
 
-# mod-expand-diff-lines: diff行数 — 两个截断路径
-def _mod_expand_diff_lines_detect():
-    # 路径1: gBT 文本截断 var VAR=(20|99),VAR=2000
-    gbt_matches = list(re.finditer(rb'var ' + V + rb'=(20|99),' + V + rb'=2000', data))
-    gbt = None
-    if len(gbt_matches) == 1:
-        gbt = 'modified' if int(gbt_matches[0].group(1)) == 99 else 'original'
-    # 路径2: bRD viewport tier
-    brd_m = re.search(rb'bRD=\{xs:\d+,sm:\d+,md:(\d+),lg:(\d+)\}', data)
-    brd = None
-    if brd_m:
-        brd = 'modified' if int(brd_m.group(1)) >= 99 and int(brd_m.group(2)) >= 99 else 'original'
-    # 只要有一个路径存在且已修改就算 modified
-    states = [s for s in [gbt, brd] if s is not None]
-    if not states:
-        return 'unknown'
-    if all(s == 'modified' for s in states):
-        return 'modified'
-    if any(s == 'modified' for s in states):
-        return 'partial'
-    return 'original'
-results['mod-expand-diff-lines'] = _mod_expand_diff_lines_detect()
-
-# mod-cycle-custom-model: Ctrl+N custom model direct cycle (v0.94+ Pz 回调)
+# mod-cycle-custom-model: Ctrl+N 预览与选择器只显示 custom models (v0.103+)
+# 三处 patch: mT1 + iT1 两个模态 selector 的 list builder，以及
+# NlL 预览组件用的 tw=Yd() (关键，控制 Ctrl+N 的实际 model 列表源)
 def _mod_cycle_custom_model_detect():
-    direct_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\)\.filter\(\(\w+\)=>!\w+\.includes\("\["\)\);'
-        rb'if\(RR\.length<=1\)return;'
-        rb'let \w+=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),\w+=RR\[\(RR\.indexOf\(\w+\)\+1\)%RR\.length\];'
-        rb'if\(\w+\)\w+\(\w+\)\},\[\w+\]\)'
-    )
-    compact_filtered_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\)\.filter\(\(\w+\)=>!\w+\.includes\("\["\)\);'
-        rb'if\(RR\.length<=1\)return;'
-        rb'let \w+=\w+\(\);if\(\w+=RR\[\(RR\.indexOf\(\w+\.hasSpecModeModel\(\)\?\w+\.getSpecModeModel\(\):\w+\.getModel\(\)\)\+1\)%RR\.length\]\)\w+\(\w+\)\},\[\w+\]\)'
-    )
-    compact_id_list_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+(?:\(\))?\.filter\(g=>!g\.includes\("\["\)\),o=\w+\(\);'
-        rb'RR\[1\]&&\w+\(RR\[RR\.indexOf\(o\.hasSpecModeModel\(\)&&o\.getSpecModeModel\(\)\|\|o\.getModel\(\)\)\+1\]\|\|RR\[0\]\)\},\[\w+\]\)'
-    )
-    compact_direct_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+\(\)\.getCustomModels\(\)\.map\(\(\w+\)=>\w+\.id\);'
-        rb'if\(RR\.length<=1\)return;'
-        rb'let \w+=\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):\w+\(\)\.getModel\(\),\w+=RR\[\(RR\.indexOf\(\w+\)\+1\)%RR\.length\];'
-        rb'if\(\w+\)\w+\(\w+\)\},\[\w+\]\)'
-    )
-    broken_direct_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let RR=\w+\(\)\.peekNextCycleModel\('
-        rb'\w+,\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):null\);'
-        rb'if\(RR\)\w+\(RR\.modelId\)\},\[\w+\]\)'
-    )
-    old_broken_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'let \w+=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
-        rb'if\(\w+\)\w+\(\w+\.modelId\)\},\[\w+\]\)'
-    )
-    original_callback_pat = re.compile(
-        rb'\w+=\w+\.useCallback\(\(\)=>\{'
-        rb'if\(\w+\.length<=1\)return;'
-        rb'let \w+=\w+\(\)\.getModelPolicy\(\);'
-        rb'if\(!\w+\.some\(\(\w+\)=>\w+\(\w+,\w+\)\.allowed\)\)return;'
-        rb'\w+\(\(\w+\)=>!\w+\)\},\[\w+\]\)'
-    )
+    mt1_core = b'JH.push(...g.map((UH)=>{let QH=fF(UH.id,M,UH);return{type:"model",id:UH.id,disabled:!QH.allowed}}));'
+    it1_core = b'JT.push(...xH.map((ER)=>{let WR=fF(ER.id,YH,ER);return{type:"model",id:ER.id,disabled:!WR.allowed}}));'
+    tw_core = b'tw=wR().getCustomModels().map(m=>m.id)'
+    states = [mt1_core in data, it1_core in data, tw_core in data]
 
-    if direct_callback_pat.search(data):
+    if all(states):
         return 'modified'
-    if compact_filtered_callback_pat.search(data):
-        return 'modified'
-    if compact_id_list_callback_pat.search(data):
-        return 'modified'
-    if compact_direct_callback_pat.search(data):
+    if any(states):
         return 'partial'
-    if broken_direct_callback_pat.search(data):
-        return 'partial'
-    if old_broken_callback_pat.search(data):
-        return 'partial'
-    if original_callback_pat.search(data):
+
+    mt1_original = re.search(
+        rb'JH\.push\(\{type:"header",label:K\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);'
+        rb'let PH=p\.map\(', data)
+    it1_original = re.search(
+        rb'JT\.push\(\{type:"header",label:bH\?t\(\"common:missionModelPicker\.recommendedHeader\"\):'
+        rb't\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);let GR=sH\.map\(', data)
+    tw_original = b',tw=Yd(),' in data
+    if mt1_original and it1_original and tw_original:
         return 'original'
-    # 旧版 mod: cycleModel 中注入 customModels
-    for fn_name in [b'peekNextCycleModel', b'cycleSpecModeModel']:
-        pos = data.find(fn_name + b'(')
-        if pos >= 0:
-            region = data[pos:pos + 800]
-            if b'=this.customModels.map(m=>m.id)' in region:
-                return 'modified'
-            if b'validateModelAccess(' in region:
-                return 'original'
     return 'unknown'
 
 results['mod-cycle-custom-model'] = _mod_cycle_custom_model_detect()

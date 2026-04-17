@@ -6,10 +6,11 @@
   bytes:  需要补偿的字节数（正数=缩减，负数=扩展）
 
 补偿区域 (按容量排序):
-  1. FFH 死代码 (mod-hide-command-truncation 后的不可达区域)  ~100-151B
-  2. mod-highlight-welcome-modified 颜色填充                  ~12B
-  3. mod-fix-multiline-history-down 空白填充                  ~6B
-  4. 旧版 mod-cycle-custom-model 注释 (兼容历史补丁)          ~36B
+  1. mod-cycle-custom-model padding (selector 工厂区压缩)      ~1032B
+  2. FFH 死代码 (mod-hide-command-truncation 后，已归档)       ~100-151B
+  3. substring 长度字面量 (旧版，新版本中已移除)               ~3B
+  4. mod-highlight-welcome-modified 颜色填充                  ~12B
+  5. mod-fix-multiline-history-down 空白填充                  ~6B
 
 原理:
   - ffh_dead: mod-hide-command-truncation 后的不可达代码，最小替换为 ';' (1 byte)
@@ -60,15 +61,17 @@ def find_regions(data):
                 dead_content = data[dead_start:dead_end]
                 add('截断函数死代码', dead_start, dead_content, len(FFH_MINIMAL), 'ffh_dead')
 
-    # 2. mod-cycle-custom-model 注释 (3个函数) — 排除截断函数区域内的注释
+    # 2. mod-cycle-custom-model padding (selector 工厂区被压缩后留下的 /* spaces */)
+    #    — 排除截断函数区域内的注释
+    #    上限 600 是为容纳 mT1(~475) 和 iT1(~557) 两个 selector 区。
     ffh_start = trunc_pat.start() if trunc_pat else -1
     ffh_end = ffh_start + 500 if ffh_start >= 0 else -1
     for m3 in re.finditer(rb'/\*( +)\*/', data):
         if ffh_start >= 0 and ffh_start <= m3.start() <= ffh_end:
             continue
         s = len(m3.group(1))
-        if 8 <= s <= 40:
-            add('mod-cycle-custom-model 注释', m3.start(), m3.group(0), 4, 'comment')
+        if 8 <= s <= 600:
+            add('mod-cycle-custom-model padding', m3.start(), m3.group(0), 4, 'comment')
 
     # 2.5 substring 长度字面量: substring(0,2000) → substring(0,8)
     substring_pat = re.search(rb'substring\(0,(2000)\)', data)

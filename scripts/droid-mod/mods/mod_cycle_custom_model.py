@@ -1,145 +1,160 @@
 #!/usr/bin/env python3
-"""mod-cycle-custom-model: Ctrl+N 在 custom models 间直接切换（不弹 selector）"""
-import sys, re
+"""mod-cycle-custom-model: Ctrl+N 预览/切换只在 custom models 间循环
+
+涉及三处 patch:
+
+1. TW (关键): Ctrl+N 真正接的 3-行预览组件 NlL 的 model 列表来自
+   `tw=Yd()`，Yd() 返回 factory 模型 id。把这里换成
+   `tw=wR().getCustomModels().map(m=>m.id)`，Ctrl+N 预览与循环就只
+   在 custom 间发生。这一处 +31 bytes（通过 mT1/iT1 的 padding 抵消）。
+
+2. mT1 (basic ModelSelector 模态): 工厂区 header/recommended/toggle/
+   hidden/customHeader 一大块压缩成只 push custom，+0 bytes，保留
+   /* spaces */ padding 作为补偿区。
+
+3. iT1 (tabbed/mission ModelSelector 模态): 同 mT1 策略，+0 bytes。
+
+整体 net: +31 bytes；mT1+iT1 padding (~1030B) 足够在 comp_universal
+里抵消本 mod 与 mod-unlock-max-custom-effort (+72B) 的总需求。
+
+兼容性: 仅针对 v0.103.x 的 React useMemo 变量命名；升级后 regex 不中即
+fail fast，不会静默跑错。脚本幂等：检测到已应用标记即跳过。
+"""
+import re
+import sys
+
 sys.path.insert(0, str(__file__).rsplit('/', 2)[0])
-from common import load_droid, save_droid, V
+from common import load_droid, save_droid
 
 NAME = 'mod-cycle-custom-model'
-STABLE_INSERT = b'=this.customModels.map(m=>m.id);'
-DIRECT_CALLBACK_MARKER = (
-    b'GR().getCustomModels().map((gA)=>gA.id).filter((gA)=>!gA.includes("["));'
-    b'if(RR.length<=1)return;'
-)
-ID_LIST_CALLBACK_MARKER = b'.filter(g=>!g.includes("[")),o=VT();RR[1]&&'
-STABLE_TARGETS = (
-    b'peekNextCycleModel',
-    b'peekNextCycleSpecModeModel',
-    b'cycleSpecModeModel',
-)
 
-ORIGINAL_CALLBACK_PAT = re.compile(
-    rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
-    rb'if\((?P<models>\w+)\.length<=1\)return;'
-    rb'let (?P<policy>\w+)=(?P<service>\w+)\(\)\.getModelPolicy\(\);'
-    rb'if\(!(?P=models)\.some\(\((?P<item>\w+)\)=>(?P<access>\w+)\((?P=item),(?P=policy)\)\.allowed\)\)return;'
-    rb'(?P<toggle>\w+)\(\((?P<state>\w+)\)=>!(?P=state)\)'
-    rb'\},\[(?P<dep>\w+)\]\)'
-    rb'(?=,(?P<handler>\w+)=\w+\.useCallback\(async\((?P<handler_arg>\w+)\)=>\{)'
+# ---------- mT1 (basic ModelSelector) ----------
+# 原始变量: JH=items, p=recommended factory, n=hidden factory, g=custom,
+#           M=policy, N=expand state, K=t(i18n)
+MT1_PAT = re.compile(
+    rb'JH\.push\(\{type:"header",label:K\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);'
+    rb'let PH=p\.map\(\(UH\)=>\{let QH=fF\(UH,M\);return\{type:"model",id:UH,disabled:!QH\.allowed\}\}\),'
+    rb'MH=n\.map\(\(UH\)=>\{let QH=fF\(UH,M\);return\{type:"model",id:UH,disabled:!QH\.allowed\}\}\),'
+    rb'CH=g\.map\(\(UH\)=>\{let QH=fF\(UH\.id,M,UH\);return\{type:"model",id:UH\.id,disabled:!QH\.allowed\}\}\);'
+    rb'if\(JH\.push\(\.\.\.PH\),n\.length>0\)JH\.push\(\{type:"toggle-builtins",expanded:N,hiddenCount:n\.length\}\);'
+    rb'if\(N\)JH\.push\(\.\.\.MH\);'
+    rb'if\(CH\.length>0\)JH\.push\(\{type:"sep"\}\),'
+    rb'JH\.push\(\{type:"header",label:K\(\"common:modelSelector\.customModelsHeader\"\)\}\),'
+    rb'JH\.push\(\.\.\.CH\);'
 )
-BROKEN_CALLBACK_PAT = re.compile(
-    rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
-    rb'let (?P<br>\w+)=\w+\(\)\.peekNextCycleModel\(Y8A\(\),VT\(\)\.hasSpecModeModel\(\)\?VT\(\)\.getSpecModeModel\(\):VT\(\)\.getModel\(\)\);'
-    rb'if\((?P=br)\)(?P<handler>\w+)\((?P=br)\.modelId\)'
-    rb'\},\[(?P<dep>\w+)\]\)'
-)
-CURRENT_BROKEN_CALLBACK_PAT = re.compile(
-    rb'(?P<prefix>(?P<cb>\w+)=(?P<react>\w+)\.useCallback\(\(\)=>\{)'
-    rb'let (?P<br>\w+)=\w+\(\)\.peekNextCycleModel\('
-    rb'(?P<dep>\w+),\w+\(\)\.hasSpecModeModel\(\)\?\w+\(\)\.getSpecModeModel\(\):null\);'
-    rb'if\((?P=br)\)(?P<handler>\w+)\((?P=br)\.modelId\)'
-    rb'\},\[(?P=dep)\]\)'
+MT1_CORE = (
+    b'JH.push(...g.map((UH)=>{let QH=fF(UH.id,M,UH);'
+    b'return{type:"model",id:UH.id,disabled:!QH.allowed}}));'
 )
 
+# ---------- iT1 (tabbed ModelSelector, mission-aware) ----------
+# 原始变量: JT=items, sH=recommended factory, rH=hidden factory, xH=custom,
+#           YH=policy, kH=expand state, bH=isMissionOrchestrator
+IT1_PAT = re.compile(
+    rb'JT\.push\(\{type:"header",label:bH\?t\(\"common:missionModelPicker\.recommendedHeader\"\):'
+    rb't\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);'
+    rb'let GR=sH\.map\(\(ER\)=>\{let WR=fF\(ER,YH\);return\{type:"model",id:ER,disabled:!WR\.allowed\}\}\),'
+    rb'uR=rH\.map\(\(ER\)=>\{let WR=fF\(ER,YH\);return\{type:"model",id:ER,disabled:!WR\.allowed\}\}\),'
+    rb'eT=xH\.map\(\(ER\)=>\{let WR=fF\(ER\.id,YH,ER\);return\{type:"model",id:ER\.id,disabled:!WR\.allowed\}\}\);'
+    rb'if\(JT\.push\(\.\.\.GR\),rH\.length>0\)JT\.push\(\{type:"sep"\}\),'
+    rb'JT\.push\(\{type:"toggle-builtins",expanded:kH,hiddenCount:rH\.length\}\);'
+    rb'if\(kH\)JT\.push\(\.\.\.uR\);'
+    rb'if\(eT\.length>0\)JT\.push\(\{type:"sep"\}\),'
+    rb'JT\.push\(\{type:"header",label:t\(\"common:modelSelector\.customModelsHeader\"\)\}\),'
+    rb'JT\.push\(\.\.\.eT\);'
+)
+IT1_CORE = (
+    b'JT.push(...xH.map((ER)=>{let WR=fF(ER.id,YH,ER);'
+    b'return{type:"model",id:ER.id,disabled:!WR.allowed}}));'
+)
 
-def is_direct_callback_patched(data):
-    return DIRECT_CALLBACK_MARKER in data or ID_LIST_CALLBACK_MARKER in data
+# ---------- TW (关键: Ctrl+N 预览 widget 的 model 列表来源) ----------
+# 在 NlL 组件外层，tw 被定义为 tw=Yd() 后传给 availableModels=tw。
+# Yd() 返回 factory 模型 id 列表；替换成 custom-only。
+TW_OLD = b'tw=Yd()'
+TW_NEW = b'tw=wR().getCustomModels().map(m=>m.id)'  # +31 bytes
+TW_ANCHOR = b',tw=Yd(),$_=!wR().hasAnyAvailableModel(tw),'  # 唯一定位 anchor
 
 
-def revert_stable_function_patch(data):
-    reverted = 0
-    for fn_name in STABLE_TARGETS:
-        entry_pat = re.compile(
-            fn_name + rb'\((?P<param>' + V + rb')(?:,' + V + rb')?\)\{(?P=param)'
-            + re.escape(STABLE_INSERT) + rb'if\((?P=param)\.length===0\)'
+def is_already_applied(data: bytes) -> bool:
+    return MT1_CORE in data and IT1_CORE in data and TW_NEW in data
+
+
+def patch_selector(data: bytes, pat: re.Pattern, core: bytes, label: str) -> bytes:
+    m = pat.search(data)
+    if not m:
+        raise ValueError(f'{label}: pattern not found')
+
+    old = m.group(0)
+    wrapper = 4  # "/*" + "*/"
+    pad_len = len(old) - len(core) - wrapper
+    if pad_len < 0:
+        raise ValueError(
+            f'{label}: new core ({len(core)}B) + wrapper ({wrapper}B) 超过 old 长度 ({len(old)}B)'
         )
-        m_entry = entry_pat.search(data)
-        if not m_entry:
-            continue
 
-        old_entry = m_entry.group(0)
-        param = m_entry.group('param')
-        new_entry = old_entry.replace(param + STABLE_INSERT, b'', 1)
-
-        region_start = m_entry.start()
-        region = data[region_start:region_start + 600]
-        m_comment = re.search(
-            rb'/\*\s*\*/(?=try\{let ' + V + rb'=PJ\((?P<loop>' + V + rb')\);)',
-            region,
-        )
-        if not m_comment:
-            raise ValueError(f"{fn_name.decode()} 稳定函数补丁回滚失败: validate 注释未找到")
-
-        loop_var = m_comment.group('loop')
-        old_check = m_comment.group(0)
-        new_check = b'if(!this.validateModelAccess(' + loop_var + b').allowed)continue;'
-
-        check_offset = region_start + m_comment.start()
-        data = data[:check_offset] + new_check + data[check_offset + len(old_check):]
-
-        entry_offset = data.find(old_entry, max(0, region_start - 10), region_start + len(old_entry) + 10)
-        if entry_offset == -1:
-            raise ValueError(f"{fn_name.decode()} 稳定函数补丁回滚失败: 入口未重新定位")
-        data = data[:entry_offset] + new_entry + data[entry_offset + len(old_entry):]
-
-        reverted += 1
-        print(f"{fn_name.decode()}: 回滚稳定函数补丁")
-
-    return data, reverted
-
-
-def build_direct_callback(prefix, handler, dep, models_expr):
-    return (
-        prefix
-        + b'let RR=' + models_expr + b'.filter(g=>!g.includes("[")),o=VT();'
-        + b'RR[1]&&' + handler
-        + b'(RR[RR.indexOf(o.hasSpecModeModel()&&o.getSpecModeModel()||o.getModel())+1]||RR[0])'
-        + b'},[' + dep + b'])'
+    new = core + b'/*' + b' ' * pad_len + b'*/'
+    assert len(new) == len(old), (len(new), len(old))
+    data = data[:m.start()] + new + data[m.end():]
+    print(
+        f'{NAME} {label}: {len(old)}B → core {len(core)}B + padding {pad_len}B '
+        f'(+0 bytes, padding 可供 comp_universal 消费)'
     )
+    return data
 
 
-def patch_callback_to_direct(data):
-    if is_direct_callback_patched(data):
-        print(f"{NAME} 已应用，跳过")
-        return data, False
+def patch_tw(data: bytes) -> bytes:
+    """将 Ctrl+N 预览组件用的 model 列表从 factory 改为 custom-only。
 
-    for label, pattern in (
-        ('修复当前 lw 错误回调', CURRENT_BROKEN_CALLBACK_PAT),
-        ('修复旧错误回调', BROKEN_CALLBACK_PAT),
-        ('替换原版 selector 回调', ORIGINAL_CALLBACK_PAT),
-    ):
-        m = pattern.search(data)
-        if not m:
-            continue
-        old = m.group(0)
-        models_expr = (
-            m.group('models')
-            if 'models' in m.groupdict() and m.group('models') is not None
-            else m.group('dep')
-            if label == '修复当前 lw 错误回调'
-            else b'Y8A()'
+    +31 bytes (不在本 patch 内部补偿，由 mT1/iT1 的 padding 统一通过
+    comp_universal 抵消)。
+    """
+    if TW_NEW in data:
+        print(f'{NAME} tw=Yd() → custom: 已应用')
+        return data
+
+    count = data.count(TW_ANCHOR)
+    if count != 1:
+        raise ValueError(
+            f'tw=Yd() anchor match count={count}, expected 1 — droid 版本可能变了'
         )
-        new = build_direct_callback(m.group('prefix'), m.group('handler'), m.group('dep'), models_expr)
-        data = data.replace(old, new, 1)
-        print(f"{NAME} {label} ({len(new) - len(old):+d} bytes)")
-        return data, True
 
-    raise ValueError("Ctrl+N 回调未找到")
+    new_anchor = TW_ANCHOR.replace(TW_OLD, TW_NEW, 1)
+    data = data.replace(TW_ANCHOR, new_anchor, 1)
+    print(
+        f'{NAME} tw=Yd() → custom: {len(TW_OLD)}B → {len(TW_NEW)}B '
+        f'({len(TW_NEW) - len(TW_OLD):+d} bytes)'
+    )
+    return data
 
 
-def main():
+def main() -> None:
     data = load_droid()
-    try:
-        data, reverted = revert_stable_function_patch(data)
-        data, patched = patch_callback_to_direct(data)
-    except ValueError as exc:
-        print(f"{NAME} 失败: {exc}")
-        sys.exit(1)
-
-    if not reverted and not patched:
+    if is_already_applied(data):
+        print(f'{NAME} 已应用，跳过')
         return
 
+    original_size = len(data)
+    try:
+        # mT1 / iT1 是 +0 字节（内部 padding），先应用以便生成补偿空间
+        if MT1_CORE not in data:
+            data = patch_selector(data, MT1_PAT, MT1_CORE, 'mT1 (basic selector)')
+        else:
+            print(f'{NAME} mT1 (basic selector): 已应用')
+        if IT1_CORE not in data:
+            data = patch_selector(data, IT1_PAT, IT1_CORE, 'iT1 (tabbed selector)')
+        else:
+            print(f'{NAME} iT1 (tabbed selector): 已应用')
+
+        # tw=Yd() → custom: +31 字节，由 comp_universal 从上面的 padding 里抵消
+        data = patch_tw(data)
+    except ValueError as exc:
+        print(f'{NAME} 失败: {exc}')
+        sys.exit(1)
+
+    delta = len(data) - original_size
     save_droid(data)
-    print(f"{NAME} 完成")
+    print(f'{NAME} 完成 ({delta:+d} bytes)')
 
 
 if __name__ == '__main__':
