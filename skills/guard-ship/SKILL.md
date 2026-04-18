@@ -12,6 +12,7 @@ argument-hint: <pr|publish|skip-review|目标分支>
 - [ ] lint/typecheck 通过
 - [ ] `git status` 无意外文件
 - [ ] `git diff --cached` 检查敏感信息（密钥、token、密码）
+- [ ] GitOps 合规（详见 `/guard-gitops`）：本次改动全部可通过 `git diff` / `git log` 复盘，无"绕过 git 直接改线上/远程/部署产物"的副作用；例外仅限 `guard-gitops` 白名单
 
 预检失败则停止，报告问题。
 
@@ -107,6 +108,7 @@ argument-hint: <pr|publish|skip-review|目标分支>
 - 未看 `git status` 和 `git diff --cached` 就交付，很容易把无关文件或敏感信息带上
 - 发布动作带远程副作用；高风险步骤必须先确认当前分支、目标分支和发布方式
 - review 可以跳过，但跳过不等于风险消失；要在交付说明里明确记录
+- 线上/运行时/部署产物已经被改过但仓库未反映 → 先按 `/guard-gitops` 把仓库拉成事实源，再谈 ship；不能一边 ship 一边留下漂移
 
 ## 扩展阅读
 
@@ -117,3 +119,4 @@ argument-hint: <pr|publish|skip-review|目标分支>
 - 预检失败 → `/dev-debug` 排查
 - 未跳过 review → 自动触发 `/guard-review`
 - 交付前验证 → `/guard-verify`
+- 涉及远程/部署/线上状态 → `/guard-gitops`

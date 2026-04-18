@@ -22,6 +22,7 @@ argument-hint: <diff 范围|留空=当前未提交变更>
 - 安全敏感改动追加 `guard-secure`
 - 声称“已完成 / 可交付”时追加 `guard-verify`
 - 需要 PR / 发布动作时切到 `guard-ship`
+- 改动会影响仓库外可见状态（远程机器、部署产物、数据库、secrets、运行时配置、仓库外二进制、第三方面板）时追加 `guard-gitops`；发现存在"绕过 git"的副作用一律升 Critical
 
 ## 边界
 

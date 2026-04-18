@@ -121,6 +121,12 @@
       "role": "canonical"
     },
     {
+      "name": "guard-gitops",
+      "path": "skills/guard-gitops",
+      "domain": "guard",
+      "role": "canonical"
+    },
+    {
       "name": "dev-tdd",
       "path": "skills/dev-tdd",
       "domain": "dev",

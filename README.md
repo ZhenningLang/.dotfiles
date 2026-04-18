@@ -14,24 +14,35 @@ My Droid skills/scripts
 
 ## Skills
 
+按域前缀组织：`think-*` 思考 / `dev-*` 开发 / `guard-*` 护栏 / `readable-*` 可读性 / `assist-*` 沉淀，其余为专项能力。
+
 | Skill | Description |
 |-------|-------------|
-| `se-plan` | 需求分析→设计→执行计划（多粒度 spec） |
-| `se-debug` | 系统化调试（科学方法，子 agent 隔离分析） |
-| `se-review` | 代码审查（simple/deep 两种模式） |
-| `se-refactor` | 代码重构（分支比较、未提交变更、自定义范围） |
-| `se-map` | 分析代码库结构、技术栈、约定和依赖 |
-| `se-ship` | 交付（PR 模式或直接发布模式） |
-| `se-research` | 实现前技术调研（选型、最佳实践、风险） |
-| `se-secure` | 安全审查（STRIDE 威胁建模） |
-| `se-quality` | 结构质量评估；判断代码/架构/diff 是否适合继续修改 |
-| `se-tdd` | TDD 工作流；新功能/bug 修复时使用 |
-| `se-verify` | 完成前验证；要求提供验证证据 |
-| `se-unstuck` | 结构化排查；连续失败 2 次、卡壳时触发 |
-| `hive` | Hive 协作运行时；用于多 agent 通信、team 上下文与消息传递 |
-| `agent-browser` | 浏览器自动化与页面调试；需要浏览器交互、截图、表单操作时使用 |
-| `frontend-design` | 前端设计约束；创建 web 组件、页面或应用时使用 |
+| `think-map` | 分析代码库结构、技术栈、约定和依赖 |
+| `think-research` | 实现前技术调研（选型、最佳实践、风险） |
+| `think-plan` | 需求分析→设计→执行计划（多粒度 spec） |
+| `think-architecture` | 架构思考与成文（先对话后成文档） |
+| `think-quality` | 结构质量评估；判断代码/架构/diff 是否适合继续修改 |
+| `think-unstuck` | 结构化排查；连续失败 2 次、卡壳时触发 |
+| `dev-debug` | 系统化调试（科学方法，子 agent 隔离分析） |
+| `dev-tdd` | TDD 工作流；新功能/bug 修复时使用 |
+| `dev-refactor` | 代码重构（分支比较、未提交变更、自定义范围） |
+| `guard-check` | 交付前总入口；编排 review/secure/verify/ship/gitops |
+| `guard-review` | 代码审查（simple/deep 两种模式） |
+| `guard-secure` | 安全审查（STRIDE 威胁建模） |
+| `guard-verify` | 完成前验证；要求提供验证证据 |
+| `guard-ship` | 交付（PR 模式或直接发布模式） |
+| `guard-close` | 完成裁决；区分 Blocking / Risk / Polish / Adjacent |
+| `guard-gitops` | Git 仓库即唯一事实源；触碰线上/远程/部署产物前使用 |
+| `readable-rewrite` | 重写内容降低认知负担，不改事实与结论 |
+| `readable-metrics` | 终端可扫描的指标表达 |
+| `assist-learn` | 经验沉淀为规则 / 模板 / 操作卡 |
+| `fe-ui-design` | 前端设计约束；创建 web 组件、页面或应用时使用 |
 | `react-doctor` | React 代码健康检查；React 改动后运行，用于提前发现问题 |
+| `web-read` | 把远程 URL / GitHub / PDF 读成干净 Markdown |
+| `agent-browser` | 浏览器与 Electron 应用自动化；交互、截图、表单、提取 |
+| `agent-health` | 审计 agent 配置栈 / skills wiring / hooks / MCP / 全局规则 |
+| `hive` | Hive 协作运行时；多 agent 通信、team 上下文与消息传递 |
 
 ## 指令分工
 
@@ -45,16 +56,18 @@ My Droid skills/scripts
 ### 技能串联
 
 ```
-se-map/se-research ─→ se-quality ─→ se-plan ─→ se-tdd ─→ se-verify ─→ se-ship
-                         │              │                       │           │
-                         │              ↓                       ↓           ↓
-                         │          se-refactor            se-review    hive/agent-browser
-                         │              │
-                         │              ↓
-                         └──────────→ se-verify
+think-map / think-research ─→ think-quality ─→ think-plan ─→ dev-tdd ─→ guard-verify ─→ guard-ship
+                                   │                │                          │               │
+                                   │                ↓                          ↓               ↓
+                                   │           dev-refactor                guard-review   hive / agent-browser
+                                   │                │
+                                   │                ↓
+                                   └────────────→ guard-verify
 
-se-debug ─→ se-verify        （任何 skill 卡住时）→ se-unstuck
-se-secure ─→ se-debug/se-tdd
+dev-debug ─→ guard-verify                  （任何 skill 卡住时）→ think-unstuck
+guard-secure ─→ dev-debug / dev-tdd
+guard-check ─→ guard-review / guard-secure / guard-verify / guard-ship / guard-gitops
+guard-gitops ─→ 触碰线上/远程/部署产物前的前置门禁（被 guard-check / guard-ship 串调用）
 ```
 
 ## 工程流程 Skills 设计
@@ -71,7 +84,7 @@ se-secure ─→ se-debug/se-tdd
 将工程流程拆为独立 Skill（`se-` 前缀），用户按需 `/se-*` 触发，不污染 idle context：
 
 - **AGENTS.md 保持权威** — 全局准则不受干扰
-- **用户控制粒度** — 快速修复直接改，严谨开发时 `/se-plan` → `/se-tdd`
+- **用户控制粒度** — 快速修复直接改，严谨开发时 `/think-plan` → `/dev-tdd`
 - **零 idle 开销** — Skill 仅在触发时加载（agent 也可主动调用）
 - **渐进式披露** — skill 主文件只保留高信号规则，细节优先下沉到 `refs/`、`examples/`、`scripts/`
 - **description 当触发器** — 让模型知道“什么时候该调用”，而不是只看到功能摘要
