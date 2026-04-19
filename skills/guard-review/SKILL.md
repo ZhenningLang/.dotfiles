@@ -15,6 +15,18 @@ argument-hint: <分支名|commit-range|--deep|留空=未提交变更>
 - `--deep` → 启用多模型对抗性审查
 - 留空 → 审查未提交变更
 
+### 工具化前置
+
+进入正式审查前，先跑 `scripts/collect_diff.py` 拿一份结构化摘要：
+
+```
+python3 scripts/collect_diff.py              # 未提交变更
+python3 scripts/collect_diff.py <branch>     # branch..HEAD
+python3 scripts/collect_diff.py a1b2..HEAD   # commit 范围
+```
+
+输出：文件/增删行数表 + Flags（敏感信息疑似、TODO/FIXME/console.log 等）。作为 review 的 overview，不替代人工判断。
+
 ## 2. Simple Review（默认）
 
 派发单个 subagent 审查 diff，输出结构化报告：
@@ -36,20 +48,21 @@ argument-hint: <分支名|commit-range|--deep|留空=未提交变更>
 
 ### 输出格式
 
-```
+```markdown
+### Diff Overview（来自 scripts/collect_diff.py）
+- 范围: `...`
+- 文件: N
+- +Added / -Removed
+
 ### Strengths
-[具体优点，带 file:line]
+- [具体优点，带 file:line]
 
 ### Issues
-
-#### Critical（必须修复）
-- **问题** — file:line — 影响 — 修复建议
-
-#### Important（应当修复）
-- ...
-
-#### Minor（建议修复）
-- ...
+| Priority | File:Line | Issue | 影响 | 修复建议 |
+|----------|-----------|-------|------|----------|
+| Critical | path:42 | <一句话> | <失败路径> | <建议> |
+| Important | path:118 | ... | ... | ... |
+| Minor | path:200 | ... | ... | ... |
 
 ### Out-of-scope observations
 - [范围外但值得记录的观察；不影响当前 Ready to merge 结论]

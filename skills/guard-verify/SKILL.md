@@ -13,26 +13,44 @@ argument-hint: <交付物|验证范围>
 ## 验证清单
 
 1. **提取可验证交付物** — 先把用户要求拆成 1-N 条“现在应该能够做到什么”，作为后续验收清单
-2. **测试通过** — 自动探测项目的 test 命令（package.json/Makefile/pyproject.toml/Cargo.toml 等），运行并贴出结果
+2. **自动跑 test/build/lint** — 优先用 `scripts/run-verify.sh` 一键探测并运行；不适配时手动跑项目对应命令
 3. **功能验证** — 对每条交付物执行验证命令或操作，确认预期行为
 4. **回归检查** — 确认没有破坏已有功能
-5. **构建通过** — 如有 build/typecheck/lint 命令，运行并确认
-6. **结构性验证** — 若本次改动涉及架构/重构/大 diff，补充说明影响面是否合理、验证护栏是否足够；必要时引用 `/think-quality` 结论
+5. **结构性验证** — 若本次改动涉及架构/重构/大 diff，补充说明影响面是否合理、验证护栏是否足够；必要时引用 `/think-quality` 结论
+
+## 工具化步骤
+
+```
+bash scripts/run-verify.sh
+```
+
+- 自动探测 package.json / pyproject.toml / Cargo.toml / Makefile / go.mod 等并运行对应 test / lint / typecheck / build
+- 输出固定 Markdown 表，agent 直接贴进报告作为 Evidence
+- exit code 0=全绿，1=有失败，2=无任何可检测命令（需要手动补）
 
 ## 输出格式
 
-完成报告必须包含：
+完成报告必须包含以下固定结构：
 
-```
+```markdown
 ## 验证结果
-### Deliverables
-- [x] [交付物 1] — [验证步骤/证据]
-- [x] [交付物 2] — [验证步骤/证据]
 
-- [x] 测试: [测试命令] — 通过 (N passed, 0 failed)
-- [x] 功能: [具体验证步骤和结果]
-- [x] 构建: [构建命令] — 成功
-- [x] 结构: [影响面/护栏/是否需要引用 `/think-quality`]
+### Deliverables
+| # | 交付物 | 验证命令 / 操作 | 证据 |
+|---|--------|----------------|------|
+| 1 | <用户要求 1> | <命令或操作> | <输出片段或截图> |
+| 2 | <用户要求 2> | ... | ... |
+
+### 自动验证（scripts/run-verify.sh）
+| Check | Command | Result | Evidence |
+|-------|---------|--------|----------|
+| tests | `...` | pass (Ns) | N passed |
+| lint  | `...` | pass | ... |
+
+### 结构性评估
+- 影响面: ...
+- 护栏是否足够: yes / no（理由）
+- 是否需要 `/think-quality`: yes / no
 ```
 
 ## 规则

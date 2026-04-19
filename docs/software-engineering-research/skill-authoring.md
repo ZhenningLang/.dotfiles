@@ -294,5 +294,25 @@ Do not proceed with implementation until this is reviewed.
 - [ ] 按 4.1/4.2/4.3 之一选骨架（推荐，非强制）
 - [ ] 如需输入参数，按 5.1 用 `{{var}}`
 - [ ] 如输出本应结构化，按 5.2 附固定表格
+- [ ] 如引用 `scripts/*.sh` 或 `scripts/*.py`（仓库根），脚本必须 `chmod +x`
 - [ ] `python3 scripts/verify_skills.py` 通过
 - [ ] `python3 -m unittest scripts.tests.test_skills_registry` 通过
+
+## 7. Tool-backed skill（可选但推荐）
+
+当 skill 有重复、机械、可自动化的步骤（探测命令、扫描 diff、预检 git 状态），把这部分下沉成仓库根的脚本，让 skill 正文引用。
+
+现有 tool-backed skills：
+
+| skill | 脚本 | 作用 |
+|-------|------|------|
+| `guard-verify` | `scripts/run-verify.sh` | 自动探测项目 test/lint/build 并运行，输出固定表 |
+| `guard-review` | `scripts/collect_diff.py` | 打印 diff overview + 敏感信息/调试遗留 flags |
+| `guard-ship` | `scripts/preflight.sh` | 分支/工作树/敏感/远端同步/追踪 secret 预检 |
+| `agent-health` | `skills/agent-health/scripts/collect_data.sh` | 收集 agent 配置审计数据 |
+
+规范：
+
+- 引用路径从仓库根开始写（如 `scripts/preflight.sh`），校验脚本会按 skill-local → repo-root 顺序解析
+- 仓库根的 `.sh` / `.py` 必须 `chmod +x`，`verify_skills.py` 会强制校验
+- 脚本输出尽量用 Markdown 表格，方便 agent 直接贴进最终报告

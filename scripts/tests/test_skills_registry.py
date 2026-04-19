@@ -220,6 +220,44 @@ class SkillsRegistryTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
+    def test_verify_script_reports_non_executable_repo_root_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            skill_dir = repo / "skills" / "guard-demo"
+            skill_dir.mkdir(parents=True)
+            scripts_dir = repo / "scripts"
+            scripts_dir.mkdir(parents=True)
+            script_file = scripts_dir / "do-thing.sh"
+            script_file.write_text("#!/usr/bin/env bash\necho hi\n")
+            # 显式去掉执行位
+            script_file.chmod(0o644)
+            (repo / "skills" / "catalog.json").write_text(
+                json.dumps(
+                    {
+                        "skills": [
+                            {
+                                "name": "guard-demo",
+                                "path": "skills/guard-demo",
+                                "domain": "guard",
+                                "role": "canonical",
+                            }
+                        ]
+                    }
+                )
+            )
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: guard-demo\ndescription: 当测试时使用；demo\n---\nRun `scripts/do-thing.sh`\n"
+            )
+
+            result = subprocess.run(
+                ["python3", str(VERIFY_SCRIPT), str(repo)],
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("SCRIPT NOT EXECUTABLE", result.stderr)
+
     def test_verify_script_accepts_brand_exception_without_trigger_prefix(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "repo"

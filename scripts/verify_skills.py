@@ -199,6 +199,33 @@ def validate_trigger_prefix(entry: SkillEntry, description: str) -> None:
         )
 
 
+def resolve_reference(entry: SkillEntry, context: ValidationContext, relative_path: str) -> Path | None:
+    """尝试按 skill-local，再按 repo-root 解析引用；任一存在就返回该 Path。"""
+    local = entry.path / relative_path
+    if local.exists():
+        return local
+    repo_root_candidate = context.repo_root / relative_path
+    if repo_root_candidate.exists():
+        return repo_root_candidate
+    return None
+
+
+def validate_executable_bit(skill_file: Path, resolved: Path) -> None:
+    # 仓库根的可执行脚本（scripts/*.sh、scripts/*.py）必须带执行位
+    if resolved.suffix not in {".sh", ".py"}:
+        return
+    if not resolved.name:
+        return
+    # 仅对 repo-root scripts/ 下的脚本校验
+    parts = resolved.parts
+    if "scripts" not in parts:
+        return
+    if not resolved.stat().st_mode & 0o111:
+        fail(
+            f"SCRIPT NOT EXECUTABLE: {skill_file} -> {resolved} (chmod +x required)"
+        )
+
+
 def validate_skill_entry(context: ValidationContext, entry: SkillEntry) -> None:
     skill_file = entry.path / "SKILL.md"
     frontmatter = parse_frontmatter(skill_file)
@@ -210,9 +237,10 @@ def validate_skill_entry(context: ValidationContext, entry: SkillEntry) -> None:
     validate_trigger_prefix(entry, frontmatter["description"])
 
     for relative_path in sorted(collect_references(skill_file)):
-        candidate = entry.path / relative_path
-        if not candidate.exists():
+        resolved = resolve_reference(entry, context, relative_path)
+        if resolved is None:
             fail(f"BROKEN REFERENCE: {skill_file} -> {relative_path}")
+        validate_executable_bit(skill_file, resolved)
 
 
 def main() -> int:

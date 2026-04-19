@@ -8,13 +8,31 @@ argument-hint: <pr|publish|skip-review|目标分支>
 
 ## 1. 预检（两种模式共用）
 
-- [ ] 所有测试通过（自动探测并运行 test 命令）
-- [ ] lint/typecheck 通过
-- [ ] `git status` 无意外文件
-- [ ] `git diff --cached` 检查敏感信息（密钥、token、密码）
+优先跑一键预检脚本：
+
+```
+bash scripts/preflight.sh
+```
+
+它会产出固定 Markdown 表，覆盖：
+
+| Check | 说明 |
+|-------|------|
+| branch | 当前分支 vs 默认分支 |
+| working tree | `git status` 是否干净 |
+| sensitive scan | diff 中敏感模式扫描（api_key/token/password/私钥） |
+| remote sync | 与 origin/<branch> 同步状态 |
+| tracked secret files | .env / *.key / *.pem 等被追踪 |
+
+exit code：0=全绿、1=软警告（需确认）、2=严重阻断（敏感信息）。
+
+补充人工项（脚本外）：
+
+- [ ] 测试通过（走 `scripts/run-verify.sh` 或手动跑）
+- [ ] `/guard-verify` 已通过
 - [ ] GitOps 合规（详见 `/guard-gitops`）：本次改动全部可通过 `git diff` / `git log` 复盘，无"绕过 git 直接改线上/远程/部署产物"的副作用；例外仅限 `guard-gitops` 白名单
 
-预检失败则停止，报告问题。
+预检出现 FAIL 则停止，报告问题。
 
 ## 2. 解析参数
 
