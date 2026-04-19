@@ -103,7 +103,7 @@
 
 ## 补充观察
 
-- `github/awesome-copilot` 是 Copilot 生态“官方中心化 registry + 规范试验场”：横跨 curated catalog、CLI 分发（`copilot plugin install ...@awesome-copilot`）和六类资源规范（agents / instructions / skills / hooks / agentic workflows / plugins），对我们最直接的参考是 `skills/` 布局、`instructions/*.instructions.md` 的 `applyTo` 注入、`hooks/hooks.json` 最小 hook 包，以及 `eng/validate-*.mjs` + `scripts/fix-line-endings.sh` 的 catalog 工程化。
+- `github/awesome-copilot` 是 Copilot 生态“官方中心化 registry + 规范试验场”：横跨 curated catalog、CLI 分发（`copilot plugin install ...@awesome-copilot`）和六类资源规范（agents / instructions / skills / hooks / agentic workflows / plugins）。从**轻量 skills** 角度看，307 个 skill 里 70% 只有单个 SKILL.md、35% 在 100 行以内，最短的 6 行——验证了“单动作 skill 20-40 行足够”这条路径；值得直接吸收的模式是：触发语义写进 `description`（`INVOKE ... when`）、反向提问型 skill（`what-context-needed` / `first-ask`）、micro-prompt 作为独立挂载项（`remember-interactive-programming`）、以及 `{{var}}` 输入 + 固定输出表格收窄 agent 自由度（`context-map`）。详见 `docs/refs-details/github/awesome-copilot.md` 的 Skills 子集专题。
 - `travisvn/awesome-claude-Skills`、`libukai/awesome-agent-Skills` 更偏导航/市场/索引；适合找来源，不适合直接当能力实现。
 - `ChromeDevTools/chrome-devtools-mcp`、`vercel-labs/agent-browser` 是浏览器自动化/前端调试类的两条重要主线，前者偏 DevTools MCP，后者偏 agent-browser CLI/runtime。
 - `Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus` 属于多智能体/多模型协作平台型项目。

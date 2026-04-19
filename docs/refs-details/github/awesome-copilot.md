@@ -48,6 +48,28 @@
 - [推断] `workflows/` 里的 agentic workflow 用 `.md` + `.lock.yml` 的方式管线化 GH Actions，比直接维护一堆 `.yml` 更好 review，值得在“仓库自身的自动化”场景参考；但它依赖 `gh aw compile`，不是直接可移植到本仓库的东西。
 - [未验证] `copilot plugin install ...@awesome-copilot` 的具体 CLI 版本支持范围与权限要求，需按 GitHub Copilot CLI 实际版本确认。
 
+## Skills 子集专题（轻量视角）
+
+- [事实] 307 个 skill 中 **216 个（70%）** 只有一个 `SKILL.md` 文件，没有 bundled assets；剩下 91 个带脚本/模板/数据。
+- [事实] SKILL.md 行数分布：`<50: 51`、`50-99: 56`、`100-199: 75`、`200-399: 76`、`≥400: 49`——约 **35% 在 100 行以内**，最短仅 6 行（`azure-role-selector`）。
+- [事实] frontmatter 只强制 `name` + `description`（10-1024 字符），很多 skill 用 `INVOKE THIS SKILL when ...` / `Use this skill when ...` 把触发语义直接写进 description，而不是在正文再占一节“何时使用”。
+- [事实] 轻量 skill 典型样本（行数 + 模式）：
+  - `remember-interactive-programming`（13 行）：纯 micro-prompt 提醒，三条行为准则，零结构。
+  - `structured-autonomy-implement`（19 行）：`<workflow>` 标签 + 硬约束列表（“MUST NOT skip any steps”）。
+  - `review-and-refactor`（15 行）、`create-readme`（21 行）：`## Role` + `## Task` 双节模板；后者直接把 4 条外部 README raw 地址当灵感源贴进来。
+  - `playwright-explore-website`（17 行）：6 步编号清单。
+  - `boost-prompt`（25 行）、`first-ask`（30 行）：借 Joyride 扩展走交互式 refinement，典型“反向提问”流程。
+  - `what-context-needed`（39 行）：先让 agent 按“Must See / Should See / Already Have / Uncertainties”四段列出所需文件再回答。
+  - `context-map`（52 行）：`{{task_description}}` 变量模板 + 四张固定输出表（Files to Modify / Dependencies / Test Files / Reference Patterns）+ 风险 checklist。
+- [推断] 对我们仓库的启发，按可落地程度排序：
+  1. **单动作 skill 做到 20-40 行**：只定“触发条件 + 步骤 + 输出格式”，不追求能力全景；可以把我们现在 100-200 行的 `dev-*/guard-*` 中“只做一件事”的节拆成独立 micro-skill。
+  2. **description 承担触发语义**：用显式触发词前缀（`INVOKE ... when`、`Use this skill when`）取代正文的“何时使用”节，与我们 `AGENTS.md` 的路由表正好互补。
+  3. **反向提问型 skill**（`what-context-needed` / `first-ask`）：在回答前强制 agent 声明需要什么，比 `think-plan` 里的一段“先澄清”更可执行；可以做成 `think-*` 下的一个独立轻量 skill。
+  4. **micro-prompt 作为独立 skill**：像 `remember-interactive-programming` 把一条行为准则做成可挂载 skill，比全塞进 `AGENTS.md` 更精准、更易按任务类型触发。
+  5. **输入参数化 + 输出表格化**：`{{var}}` 模板收窄输入、固定表格收窄输出，两头都减少 agent 自由度；比纯自然语言指令更稳。
+  6. **外部参考直接放正文**（`create-readme` 列 GitHub raw 地址）：轻量场景下比 `references/` 子目录更省结构。
+- [推断] 不适合照搬：重型流水线类 skill（`gh-cli` 2187 行、`cosmosdb-datamodeling` 1045 行）更像是把产品手册压进 SKILL.md，我们现在的工程习惯路线不需要这种粒度。
+
 ## 最近 14 天更新（2026-04-05 ~ 2026-04-19）
 <!-- recent-updates:start -->
 - [事实] 检查基线：`origin/main`
