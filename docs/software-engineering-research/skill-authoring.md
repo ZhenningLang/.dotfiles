@@ -138,8 +138,161 @@ got: "..."
 
 ---
 
-## 4. 后续节（PR2 补充）
+## 4. SKILL.md 结构模板（推荐，不强制）
 
-- 结构模板：3 个 SKILL.md 正文骨架（动作型 / 工作流型 / 反向提问型）
-- 输入输出模板：`{{var}}` 占位符约定 + 固定输出表格模式
-- 完整样例：见 `skill-patterns.md`
+本仓库的 skill 按规模大致分三类骨架。**这是推荐，不是硬约束**——现有 skill 保持现状，只在新增或大改时参考。
+
+### 4.1 动作型骨架（20-60 行）
+
+单一任务、步骤清晰、可在一次 agent 调用内完成。
+
+```markdown
+---
+name: <skill-name>
+description: 当 ... 时使用；<能力摘要>。
+---
+
+## Role
+
+简短角色声明（1-3 句）。
+
+## Task
+
+1. 第一步
+2. 第二步
+3. ...
+```
+
+样例：`review-and-refactor`（awesome-copilot，15 行）、`create-readme`（awesome-copilot，21 行）。
+
+### 4.2 工作流型骨架（60-200 行）
+
+方法论型 skill，含核心循环、判断启发式、禁止项、扩展阅读、关联技能。
+
+```markdown
+---
+name: <skill-name>
+description: 当 ... 时使用；<能力摘要>。
+---
+
+# <Skill 标题>
+
+## 核心循环
+...
+
+## 判断启发式
+| 场景 | 走哪条 |
+
+## 跳过条件
+...
+
+## Gotchas
+...
+
+## 关联技能
+...
+```
+
+样例：本仓库 `dev-tdd`、`dev-debug`、`guard-check`。
+
+### 4.3 反向提问型骨架（30-60 行）
+
+在执行前强制 agent 先声明信息需求，避免盲推。
+
+```markdown
+---
+name: <skill-name>
+description: 当 ... 时使用；<能力摘要>。
+---
+
+# <Skill 标题>
+
+Before <doing something>, <声明信息需求>.
+
+## Input
+{{task_description}}
+
+## Instructions
+1. ...
+2. ...
+
+## Output Format
+\`\`\`markdown
+## <固定输出表格或结构>
+| ... | ... |
+\`\`\`
+
+Do not proceed with implementation until this is reviewed.
+```
+
+样例：awesome-copilot `what-context-needed`（39 行）、`context-map`（52 行）。
+
+---
+
+## 5. 输入输出模板（可选）
+
+### 5.1 `{{var}}` 输入占位
+
+当 skill 需要用户在调用时传入参数（任务描述、URL、问题等），用 `{{var_name}}` 作为占位符。
+
+- agent 使用时会把 `{{var_name}}` 替换成实际内容
+- 占位符紧邻其所属段落，不放 frontmatter
+- 多个占位符各自独立段落
+
+```markdown
+## 我的问题
+
+{{question}}
+
+## 任务
+
+{{task_description}}
+```
+
+### 5.2 固定输出表格
+
+当 skill 的输出本该结构化（review findings、verify 结果、文件清单等），在 SKILL.md 末尾附"输出格式"节，给出精确的 markdown 表头。
+
+```markdown
+## Output Format
+
+\`\`\`markdown
+## Findings
+
+| Priority | File | Line | Issue |
+|---|---|---|---|
+| P0/P1/P2/P3 | path | N | 一句话 + 证据 |
+
+## 验收
+- [ ] 无 P0/P1
+- [ ] 验证已通过
+\`\`\`
+```
+
+收益：
+
+- agent 每次输出同一结构，跨次对比可扫描
+- 可作为下游脚本/自动化的输入
+- 避免自由叙述带来的遗漏（"我忘了写 Line 列"）
+
+### 5.3 何时用 vs 不用
+
+| 场景 | 是否用 |
+|---|---|
+| skill 输出本来就是表格/清单（review、verify、map） | ✅ 强烈推荐 |
+| skill 输出是自由叙述（解释、方案讨论、架构说明） | ❌ 不强制，表格会束缚表达 |
+| skill 输出是代码（scaffold、generate） | ❌ 不适用 |
+
+完整样例见 `skill-patterns.md`。
+
+---
+
+## 6. 检查清单（新增/大改 skill 时）
+
+- [ ] frontmatter：`name` 与目录名一致
+- [ ] frontmatter：`description` 通过 1.1-1.4 的硬约束
+- [ ] 按 4.1/4.2/4.3 之一选骨架（推荐，非强制）
+- [ ] 如需输入参数，按 5.1 用 `{{var}}`
+- [ ] 如输出本应结构化，按 5.2 附固定表格
+- [ ] `python3 scripts/verify_skills.py` 通过
+- [ ] `python3 -m unittest scripts.tests.test_skills_registry` 通过

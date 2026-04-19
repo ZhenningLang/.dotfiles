@@ -57,6 +57,12 @@
 - 能靠配置、脚本、hook、测试强制的规则，不要只写成自然语言提醒
 - 不要继续把解释性内容堆进 `AGENTS.md`；细则优先下沉，避免全局上下文膨胀
 
+### Skill 编写规范
+
+- 新增或大改 skill 前读 `docs/software-engineering-research/skill-authoring.md`（触发语义硬约束、结构模板、输入输出格式）
+- 可复用 prompt 模式样例见 `docs/software-engineering-research/skill-patterns.md`
+- `description` 触发前缀由 `scripts/verify_skills.py` 强制校验
+
 ### AI-friendly 代码约束
 
 - 优先写可预测、可局部修改、可验证的代码，而不是只追求“优雅”
