@@ -15,28 +15,31 @@ results = {}
 # 已归档（不再参与状态检测）: mod-hide-command-truncation, mod-expand-diff-lines
 # 归档文件: mods/_archive/
 
-# mod-cycle-custom-model: Ctrl+N 预览与选择器只显示 custom models (v0.103+)
-# 三处 patch: mT1 + iT1 两个模态 selector 的 list builder，以及
-# NlL 预览组件用的 tw=Yd() (关键，控制 Ctrl+N 的实际 model 列表源)
+# mod-cycle-custom-model: Ctrl+N 预览与选择器只显示 custom models
 def _mod_cycle_custom_model_detect():
-    mt1_core = b'JH.push(...g.map((UH)=>{let QH=fF(UH.id,M,UH);return{type:"model",id:UH.id,disabled:!QH.allowed}}));'
-    it1_core = b'JT.push(...xH.map((ER)=>{let WR=fF(ER.id,YH,ER);return{type:"model",id:ER.id,disabled:!WR.allowed}}));'
-    tw_core = b'tw=wR().getCustomModels().map(m=>m.id)'
-    states = [mt1_core in data, it1_core in data, tw_core in data]
-
-    if all(states):
+    selector_core_count = len(re.findall(
+        rb'(?P<items>' + V + rb')\.push\(\.\.\.(?P<custom>' + V + rb')\.map\(\((?P<item>' + V + rb')\)=>\{let (?P<check>' + V + rb')=(?P<access>' + V + rb')\((?P=item)\.id,(?P<policy>' + V + rb'),(?P=item)\);return\{type:"model",id:(?P=item)\.id,disabled:!(?P=check)\.allowed\}\}\)\);',
+        data,
+    ))
+    tw_core = re.search(
+        rb'(?P<models>' + V + rb')=(?P<svc>' + V + rb')\(\)\.getCustomModels\(\)\.map\(m=>m\.id\),(?P<empty>' + V + rb')=!(?P=svc)\(\)\.hasAnyAvailableModel\((?P=models)\),',
+        data,
+    )
+    selector_original_count = len(re.findall(
+        rb'(?P<items>' + V + rb')\.push\(\{type:"header",label:(?:(?P<mission>' + V + rb')\?)?(?P<tfn>' + V + rb')\("common:(?:missionModelPicker\.recommendedHeader|modelSelector\.factoryModelsHeader)"\)(?::\s*(?P=tfn)\("common:modelSelector\.factoryModelsHeader"\))?\}\);'
+        rb'let (?P<recommended>' + V + rb')=(?P<factory>' + V + rb')\.map\(\((?P<fitem>' + V + rb')\)=>\{let (?P<fcheck>' + V + rb')=(?P<access>' + V + rb')\((?P=fitem),(?P<policy>' + V + rb')\);return\{type:"model",id:(?P=fitem),disabled:!(?P=fcheck)\.allowed\}\}\),',
+        data,
+    ))
+    if selector_core_count > 0 and selector_original_count == 0 and tw_core:
         return 'modified'
-    if any(states):
+    if selector_core_count > 0 or selector_original_count > 0 or tw_core:
         return 'partial'
 
-    mt1_original = re.search(
-        rb'JH\.push\(\{type:"header",label:K\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);'
-        rb'let PH=p\.map\(', data)
-    it1_original = re.search(
-        rb'JT\.push\(\{type:"header",label:bH\?t\(\"common:missionModelPicker\.recommendedHeader\"\):'
-        rb't\(\"common:modelSelector\.factoryModelsHeader\"\)\}\);let GR=sH\.map\(', data)
-    tw_original = b',tw=Yd(),' in data
-    if mt1_original and it1_original and tw_original:
+    tw_original = re.search(
+        rb'(?P<prefix>,)(?P<models>' + V + rb')=(?P<src>' + V + rb')\(\),(?P<empty>' + V + rb')=!(?P<svc>' + V + rb')\(\)\.hasAnyAvailableModel\((?P=models)\),',
+        data,
+    )
+    if selector_original_count > 0 and tw_original:
         return 'original'
     return 'unknown'
 

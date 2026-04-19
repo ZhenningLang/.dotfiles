@@ -56,6 +56,27 @@ TW_ANCHOR_PATCHED = (
 )
 TW_CORE = b'tw=wR().getCustomModels().map(m=>m.id)'
 
+SELECTOR_104_ORIGINAL = (
+    b'_T.push({type:"header",label:oH?HH("common:missionModelPicker.recommendedHeader"): '
+    b'HH("common:modelSelector.factoryModelsHeader")});'
+    b'let TR=tH.map((cR)=>{let QR=If(cR,yH);return{type:"model",id:cR,disabled:!QR.allowed}}),'
+    b'VR=bH.map((cR)=>{let QR=If(cR,yH);return{type:"model",id:cR,disabled:!QR.allowed}}),'
+    b'oT=vH.map((cR)=>{let QR=If(cR.id,yH,cR);return{type:"model",id:cR.id,disabled:!QR.allowed}});'
+    b'if(_T.push(...TR),bH.length>0)_T.push({type:"sep"}),'
+    b'_T.push({type:"toggle-builtins",expanded:fH,hiddenCount:bH.length});'
+    b'if(fH)_T.push(...VR);'
+    b'if(oT.length>0)_T.push({type:"sep"}),'
+    b'_T.push({type:"header",label:HH("common:modelSelector.customModelsHeader")}),'
+    b'_T.push(...oT);'
+)
+SELECTOR_104_CORE = (
+    b'_T.push(...vH.map((cR)=>{let QR=If(cR.id,yH,cR);'
+    b'return{type:"model",id:cR.id,disabled:!QR.allowed}}));'
+)
+TW_104_ORIGINAL = b',fJ=ye(),sw=!UR().hasAnyAvailableModel(fJ),'
+TW_104_PATCHED = b',fJ=UR().getCustomModels().map(m=>m.id),sw=!UR().hasAnyAvailableModel(fJ),'
+TW_104_CORE = b'fJ=UR().getCustomModels().map(m=>m.id)'
+
 
 def _write_droid(home: Path, data: bytes) -> Path:
     droid = home / ".local/bin/droid"
@@ -154,6 +175,53 @@ class ModCycleCustomModelTests(unittest.TestCase):
             self.assertIn(it1_applied, patched)
             self.assertIn(TW_CORE, patched)
             self.assertNotIn(b',tw=Yd(),', patched)
+
+    def test_patches_remaining_selector_when_tw_already_patched(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            mt1_applied = MT1_CORE + b'/*' + b' ' * 20 + b'*/'
+            original = mt1_applied + b"...filler..." + IT1_ORIGINAL + b"...filler..." + TW_ANCHOR_PATCHED
+            droid = _write_droid(home, original)
+
+            result = _run(SCRIPT, home)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            patched = droid.read_bytes()
+            self.assertIn(mt1_applied, patched)
+            self.assertIn(IT1_CORE, patched)
+            self.assertNotIn(b'common:missionModelPicker.recommendedHeader', patched)
+            self.assertNotIn(b'toggle-builtins', patched)
+
+    def test_status_reports_partial_when_only_one_selector_is_patched(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            mt1_applied = MT1_CORE + b'/*' + b' ' * 20 + b'*/'
+            droid = _write_droid(home, mt1_applied + b"...filler..." + IT1_ORIGINAL + b"...filler..." + TW_ANCHOR_PATCHED)
+
+            status = _run(STATUS, home)
+            self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
+            self.assertIn("mod-cycle-custom-model: 部分修改", status.stdout)
+
+    def test_patches_v104_style_selector_and_tw(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home = Path(tmpdir)
+            original = SELECTOR_104_ORIGINAL + b"...filler..." + TW_104_ORIGINAL
+            droid = _write_droid(home, original)
+
+            result = _run(SCRIPT, home)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            patched = droid.read_bytes()
+            self.assertEqual(len(patched) - len(original), len(TW_104_PATCHED) - len(TW_104_ORIGINAL))
+            self.assertIn(SELECTOR_104_CORE, patched)
+            self.assertIn(TW_104_CORE, patched)
+            self.assertNotIn(b'common:modelSelector.factoryModelsHeader', patched)
+            self.assertNotIn(b'toggle-builtins', patched)
+            self.assertIn(TW_104_PATCHED, patched)
+
+            status = _run(STATUS, home)
+            self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
+            self.assertIn("mod-cycle-custom-model: 已修改", status.stdout)
 
     def test_fails_loudly_when_pattern_not_found(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
