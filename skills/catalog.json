@@ -155,6 +155,30 @@
       "path": "skills/assist-learn",
       "domain": "assist",
       "role": "canonical"
+    },
+    {
+      "name": "think-ask-context",
+      "path": "skills/think-ask-context",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "think-context-map",
+      "path": "skills/think-context-map",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "think-refine",
+      "path": "skills/think-refine",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
+      "name": "guard-diff-scan",
+      "path": "skills/guard-diff-scan",
+      "domain": "guard",
+      "role": "canonical"
     }
   ]
 }
