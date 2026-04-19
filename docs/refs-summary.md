@@ -3,7 +3,7 @@
 ## 分类说明
 
 - **浏览器自动化与前端调试**：围绕浏览器控制、前端诊断、性能分析、页面抓取与 UI 调试。 代表项目：`ChromeDevTools/chrome-devtools-mcp`、`vercel-labs/agent-browser`
-- **技能集合与市场**：以 skills 汇总、分发、导航或精选集合为主，常附带少量示例或插件。 代表项目：`Dimillian/Skills`、`affaan-m/everything-claude-code`、`anthropics/skills`、`glittercowboy/taches-cc-resources`、`libukai/awesome-agent-Skills`、`travisvn/awesome-claude-Skills`、`tw93/Waza`
+- **技能集合与市场**：以 skills 汇总、分发、导航或精选集合为主，常附带少量示例或插件。 代表项目：`Dimillian/Skills`、`affaan-m/everything-claude-code`、`anthropics/skills`、`github/awesome-copilot`、`glittercowboy/taches-cc-resources`、`libukai/awesome-agent-Skills`、`travisvn/awesome-claude-Skills`、`tw93/Waza`
 - **多智能体协作与工作流编排**：围绕 agent 角色分工、并行执行、状态同步、团队工作流编排。 代表项目：`Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus`
 - **上下文 / 记忆管理**：围绕上下文压缩、记忆持久化、检索、session 连续性与 context engineering。 代表项目：`mksglu/context-mode`、`muratcankoylan/Agent-Skills-for-Context-Engineering`
 - **前端 UI / 设计系统**：围绕视觉设计、组件模式、设计系统、界面审查与 UI 生成。 代表项目：`google-labs-code/stitch-skills`、`nextlevelbuilder/ui-ux-pro-max-skill`、`pbakaus/impeccable`、`vercel-labs/agent-skills`
@@ -24,6 +24,7 @@
 | [`automazeio/ccpm`](./refs-details/automazeio/ccpm.md) | 研发流程 / 项目管理 | 单技能形态的项目管理与交付编排系统，把 PRD、Epic、Issues、并行 agents 和状态跟踪串成 spec-driven workflow。 |
 | [`ChromeDevTools/chrome-devtools-mcp`](./refs-details/ChromeDevTools/chrome-devtools-mcp.md) | 浏览器自动化与前端调试 | 通过 MCP 控制真实 Chrome，提供自动化、调试、性能分析和配套 skills。 |
 | [`Dimillian/Skills`](./refs-details/Dimillian/Skills.md) | 技能集合与市场 | 偏精选型的 skills 集合，覆盖 Apple 平台开发、GitHub 操作、review swarm、React 性能和重构。 |
+| [`github/awesome-copilot`](./refs-details/github/awesome-copilot.md) | 技能集合与市场 | GitHub 官方运营的 Copilot 资源集合，统一管理 agents / instructions / skills / hooks / agentic workflows / plugins，并配套 marketplace、网站与 CLI 安装。 |
 | [`glittercowboy/taches-cc-resources`](./refs-details/glittercowboy/taches-cc-resources.md) | 技能集合与市场 | 面向 Claude Code 的资源仓库，主打技能开发、规划分层、MCP 服务生成、调试方法论与 Ralph 自治循环。 |
 | [`google-labs-code/stitch-skills`](./refs-details/google-labs-code/stitch-skills.md) | 前端 UI / 设计系统 | 围绕 Stitch MCP 的 Agent Skills 库，用于 UI 设计生成、设计系统提炼、React 转换和演示视频生成。 |
 | [`gsd-build/get-shit-done`](./refs-details/gsd-build/get-shit-done.md) | 研发流程 / 项目管理 | 跨多种 AI 运行时的 spec-driven development / context engineering 系统，覆盖立项、规划、执行、验证、交付全流程。 |
@@ -69,6 +70,7 @@
 | [`HughYau/qiushi-skill`](./refs-details/HughYau/qiushi-skill.md) | 21 | [推断] 新增案例分享/展示示例，补强方法论边界与安装路径说明，增加站点入口页（`index.html`/`.nojekyll`）与 README 展示增强，并加入 ASCII JSON 字符串处理能力。 |
 | [`notdp/.dotfiles`](./refs-details/notdp/.dotfiles.md) | 17 | [推断] `droid-bin-mod` 新增 unicode partial-json 修复与 ym9 tag strip truncation 修复，同时继续刷新镜像 skills，并补入 `lark-*`、`hfork`/`vfork`/`notify` 等能力。 |
 | [`nyldn/claude-octopus`](./refs-details/nyldn/claude-octopus.md) | 15 | [推断] 同步 Claude Code `v2.1.89-101`，引入 15 个 feature flags、PermissionDenied 审计 hook、session auto-titling 与 macOS CI，并继续收敛 review/doctor/可移植性问题。 |
+| [`github/awesome-copilot`](./refs-details/github/awesome-copilot.md) | 73 | [推断] `skills/` + `agents/` 持续扩充（Qdrant / Foundry / LinkedIn / browser investigation / code-tour / whatidid 等），批量修正 agents 的 deprecated tool names，并把 a11y / security / performance instructions 刷到 2025-2026 标准，同时完善 skills 校验与网站一键安装命令。 |
 | [`ChromeDevTools/chrome-devtools-mcp`](./refs-details/ChromeDevTools/chrome-devtools-mcp.md) | 13 | [事实] 近 14 天提交标题以依赖升级、README 中新增 Mistral Vibe 配置说明和文档修复为主，未见明显功能型提交。 |
 | [`millionco/react-doctor`](./refs-details/millionco/react-doctor.md) | 6 | [推断] 发布 `0.0.31`/`0.0.32`/`0.0.33`，重点修复 setter 检测与 catalog resolution、file ignoring、CLI、React Native、Next.js、offline、monorepo 等问题。 |
 | [`vercel-labs/skills`](./refs-details/vercel-labs/skills.md) | 5 | [推断] 发布 `v1.5.0`/`v1.4.9`，改进项目级/全局级更新文案与单 skill update 路径，并增加对 `openclaw` 重复/恶意技能的风险警告。 |
@@ -101,6 +103,7 @@
 
 ## 补充观察
 
+- `github/awesome-copilot` 是 Copilot 生态“官方中心化 registry + 规范试验场”：横跨 curated catalog、CLI 分发（`copilot plugin install ...@awesome-copilot`）和六类资源规范（agents / instructions / skills / hooks / agentic workflows / plugins），对我们最直接的参考是 `skills/` 布局、`instructions/*.instructions.md` 的 `applyTo` 注入、`hooks/hooks.json` 最小 hook 包，以及 `eng/validate-*.mjs` + `scripts/fix-line-endings.sh` 的 catalog 工程化。
 - `travisvn/awesome-claude-Skills`、`libukai/awesome-agent-Skills` 更偏导航/市场/索引；适合找来源，不适合直接当能力实现。
 - `ChromeDevTools/chrome-devtools-mcp`、`vercel-labs/agent-browser` 是浏览器自动化/前端调试类的两条重要主线，前者偏 DevTools MCP，后者偏 agent-browser CLI/runtime。
 - `Yeachan-Heo/oh-my-claudecode`、`notdp/hive`、`nyldn/claude-octopus` 属于多智能体/多模型协作平台型项目。

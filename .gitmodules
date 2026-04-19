@@ -85,3 +85,6 @@
 [submodule "refs/tirth8205/code-review-graph"]
 	path = refs/tirth8205/code-review-graph
 	url = https://github.com/tirth8205/code-review-graph.git
+[submodule "refs/github/awesome-copilot"]
+	path = refs/github/awesome-copilot
+	url = https://github.com/github/awesome-copilot.git
