@@ -1,6 +1,6 @@
 ---
 name: guard-verify
-description: 准备声称“已完成/已修复/可交付”时使用；必须给出验证证据，不能空口收尾。
+description: 当准备声称“已完成/已修复/可交付”时使用；必须给出验证证据，不能空口收尾。
 argument-hint: <交付物|验证范围>
 ---
 

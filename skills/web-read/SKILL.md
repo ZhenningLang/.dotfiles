@@ -1,6 +1,6 @@
 ---
 name: web-read
-description: 当用户给出 URL、GitHub 页面或 PDF，需要读取并转换为干净 Markdown 时使用；优先走脚本化抓取链路，而不是每次临时拼工具。
+description: 当对话中出现 URL、GitHub 页面或 PDF，需要读取并转换为干净 Markdown 时使用；优先走脚本化抓取链路，而不是每次临时拼工具。
 argument-hint: <URL|PDF 链接>
 ---
 

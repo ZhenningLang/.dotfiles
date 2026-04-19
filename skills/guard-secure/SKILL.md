@@ -1,6 +1,6 @@
 ---
 name: guard-secure
-description: 安全审查（STRIDE 威胁建模）。用户要求安全审查、漏洞扫描、评估攻击面时使用。
+description: 当改动触及认证、授权、数据处理、网络边界或外部依赖，或需要做漏洞扫描和攻击面评估时使用；基于 STRIDE 威胁建模。
 argument-hint: <文件/目录|功能描述|留空=最近变更>
 ---
 

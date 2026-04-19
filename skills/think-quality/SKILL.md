@@ -1,6 +1,6 @@
 ---
 name: think-quality
-description: 准备动复杂改动、怀疑结构会拖慢 agent、或要评估代码/架构/diff 可修改性时使用。
+description: 当准备动复杂改动、怀疑结构会拖慢 agent，或要评估代码/架构/diff 可修改性时使用；输出结构化问题清单。
 argument-hint: <文件/目录|diff|分支名|commit-range>
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: dev-tdd
-description: 新功能、修 bug、改行为前使用；先写失败测试再写实现，纯配置/文档/样式变更跳过。
+description: 当新增功能、修复 bug 或调整行为前使用；先写失败测试再写实现，纯配置/文档/样式变更跳过。
 argument-hint: <功能点|bug 描述|行为变更>
 ---
 

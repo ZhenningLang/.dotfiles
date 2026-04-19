@@ -1,6 +1,6 @@
 ---
 name: readable-rewrite
-description: 重写一段内容，使之更易于人类理解；降低认知负担，但不改变事实、约束和结论。
+description: 当一段内容表述太密、太绕或太难读、需要降低认知负担时使用；重写但不改变事实、约束和结论。
 argument-hint: <原文|用途|读者>
 ---
 

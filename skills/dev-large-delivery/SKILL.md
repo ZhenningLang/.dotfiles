@@ -1,6 +1,6 @@
 ---
 name: dev-large-delivery
-description: 跨 Phase / 跨子系统 / 动基础设施的大型交付节奏。test 环境先行、新旧双跑、人工验收、回滚剧本常驻。日常小改动用 /dev-tdd，不走本 skill。
+description: 当改动跨 Phase、跨子系统或动基础设施时使用；强调 test 环境先行、新旧双跑、人工验收、回滚剧本常驻（日常小改动用 /dev-tdd，不走本 skill）。
 argument-hint: <项目名|改动范围|当前 Phase>
 ---
 

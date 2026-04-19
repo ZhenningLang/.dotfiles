@@ -1,6 +1,6 @@
 ---
 name: guard-ship
-description: 交付（PR 模式或直接发布模式）。用户要求提交、发布、创建 PR、合并分支时使用。
+description: 当改动已完成、需要创建 PR、合并分支或推送到远端时使用；支持 PR 模式与直接发布模式。
 argument-hint: <pr|publish|skip-review|目标分支>
 ---
 

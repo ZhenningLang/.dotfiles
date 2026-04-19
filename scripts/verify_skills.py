@@ -15,6 +15,12 @@ BRAND_EXCEPTIONS = {"hive", "agent-browser", "react-doctor"}
 REFERENCE_PATTERN = re.compile(
     r"(?<![/.])\b(?:refs|references|examples|scripts|agents|templates)/[\w./-]+\b"
 )
+TRIGGER_PREFIXES = (
+    "Use when ",
+    "Invoke when ",
+    "用于",
+    "当",
+)
 
 
 class ValidationError(RuntimeError):
@@ -28,6 +34,7 @@ class SkillEntry:
     domain: str
     role: str
     migration: dict[str, Any] | None
+    trigger_exempt: bool
 
 
 @dataclass(frozen=True)
@@ -71,6 +78,7 @@ def load_catalog(context: ValidationContext) -> list[SkillEntry]:
         domain = raw_entry.get("domain")
         role = raw_entry.get("role")
         migration = raw_entry.get("migration")
+        trigger_exempt = bool(raw_entry.get("trigger-exempt", False))
 
         if not isinstance(name, str) or not name:
             fail("INVALID CATALOG: skill name must be a non-empty string")
@@ -120,7 +128,16 @@ def load_catalog(context: ValidationContext) -> list[SkillEntry]:
             if migration is not None:
                 fail(f"BRAND EXCEPTION MIGRATION FORBIDDEN: {name}")
 
-        entries.append(SkillEntry(name=name, path=path, domain=domain, role=role, migration=migration))
+        entries.append(
+            SkillEntry(
+                name=name,
+                path=path,
+                domain=domain,
+                role=role,
+                migration=migration,
+                trigger_exempt=trigger_exempt,
+            )
+        )
         seen_names.add(name)
         seen_paths.add(path)
         roles_by_name[name] = role
@@ -166,6 +183,22 @@ def collect_references(skill_file: Path) -> set[str]:
     return set(REFERENCE_PATTERN.findall(content))
 
 
+def is_trigger_exempt(entry: SkillEntry) -> bool:
+    # brand-exception skills 默认豁免，其它 skill 通过 trigger-exempt 显式豁免
+    return entry.role == "brand-exception" or entry.trigger_exempt
+
+
+def validate_trigger_prefix(entry: SkillEntry, description: str) -> None:
+    if is_trigger_exempt(entry):
+        return
+    if not any(description.startswith(prefix) for prefix in TRIGGER_PREFIXES):
+        allowed = "\n  - ".join(repr(p) for p in TRIGGER_PREFIXES)
+        fail(
+            f"DESCRIPTION TRIGGER PREFIX VIOLATION: {entry.name} description must start with one of:\n  - {allowed}\n"
+            f"got: {description!r}"
+        )
+
+
 def validate_skill_entry(context: ValidationContext, entry: SkillEntry) -> None:
     skill_file = entry.path / "SKILL.md"
     frontmatter = parse_frontmatter(skill_file)
@@ -173,6 +206,8 @@ def validate_skill_entry(context: ValidationContext, entry: SkillEntry) -> None:
         fail(
             f"NAME MISMATCH: catalog={entry.name} frontmatter={frontmatter['name']} file={skill_file}"
         )
+
+    validate_trigger_prefix(entry, frontmatter["description"])
 
     for relative_path in sorted(collect_references(skill_file)):
         candidate = entry.path / relative_path

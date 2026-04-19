@@ -108,7 +108,7 @@ class SkillsRegistryTests(unittest.TestCase):
                 )
             )
             (skill_dir / "SKILL.md").write_text(
-                "---\nname: web-demo\ndescription: demo\n---\nSee references/missing.md\n"
+                "---\nname: web-demo\ndescription: 当测试时使用；demo\n---\nSee references/missing.md\n"
             )
 
             result = subprocess.run(
@@ -144,7 +144,7 @@ class SkillsRegistryTests(unittest.TestCase):
                 )
             )
             (skill_dir / "SKILL.md").write_text(
-                "---\nname: legacy-demo\ndescription: demo\n---\n# demo\n"
+                "---\nname: legacy-demo\ndescription: 当测试时使用；demo\n---\n# demo\n"
             )
 
             result = subprocess.run(
@@ -155,6 +155,101 @@ class SkillsRegistryTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("UNKNOWN FUTURE CANONICAL", result.stderr)
+
+    def test_verify_script_reports_description_trigger_prefix_violation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            skill_dir = repo / "skills" / "think-demo"
+            skill_dir.mkdir(parents=True)
+            (repo / "skills" / "catalog.json").write_text(
+                json.dumps(
+                    {
+                        "skills": [
+                            {
+                                "name": "think-demo",
+                                "path": "skills/think-demo",
+                                "domain": "think",
+                                "role": "canonical",
+                            }
+                        ]
+                    }
+                )
+            )
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: think-demo\ndescription: 用户要求 demo 时使用\n---\n# demo\n"
+            )
+
+            result = subprocess.run(
+                ["python3", str(VERIFY_SCRIPT), str(repo)],
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("DESCRIPTION TRIGGER PREFIX VIOLATION", result.stderr)
+
+    def test_verify_script_accepts_trigger_exempt_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            skill_dir = repo / "skills" / "dev-demo"
+            skill_dir.mkdir(parents=True)
+            (repo / "skills" / "catalog.json").write_text(
+                json.dumps(
+                    {
+                        "skills": [
+                            {
+                                "name": "dev-demo",
+                                "path": "skills/dev-demo",
+                                "domain": "dev",
+                                "role": "canonical",
+                                "trigger-exempt": True,
+                            }
+                        ]
+                    }
+                )
+            )
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: dev-demo\ndescription: Run after a demo\n---\n# demo\n"
+            )
+
+            result = subprocess.run(
+                ["python3", str(VERIFY_SCRIPT), str(repo)],
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
+    def test_verify_script_accepts_brand_exception_without_trigger_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            skill_dir = repo / "skills" / "hive"
+            skill_dir.mkdir(parents=True)
+            (repo / "skills" / "catalog.json").write_text(
+                json.dumps(
+                    {
+                        "skills": [
+                            {
+                                "name": "hive",
+                                "path": "skills/hive",
+                                "domain": "team",
+                                "role": "brand-exception",
+                            }
+                        ]
+                    }
+                )
+            )
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: hive\ndescription: Hive 基础 skill，无固定触发前缀\n---\n# hive\n"
+            )
+
+            result = subprocess.run(
+                ["python3", str(VERIFY_SCRIPT), str(repo)],
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 ---
 name: dev-refactor
-description: 代码重构（分支比较、未提交变更、自定义范围）。用户要求重构、简化、清理重复和结构债时使用。
+description: 当代码出现重复、结构债、可读性下降或需要调整模块边界时使用；支持分支比较、未提交变更与自定义范围。
 argument-hint: <branch|uncommitted|文件/目录/符号名>
 ---
 
