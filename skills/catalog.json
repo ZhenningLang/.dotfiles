@@ -179,6 +179,12 @@
       "path": "skills/guard-diff-scan",
       "domain": "guard",
       "role": "canonical"
+    },
+    {
+      "name": "fe-ui-visual-iterate",
+      "path": "skills/fe-ui-visual-iterate",
+      "domain": "fe",
+      "role": "canonical"
     }
   ]
 }
