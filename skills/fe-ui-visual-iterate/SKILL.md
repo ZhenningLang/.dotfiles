@@ -9,10 +9,17 @@ allowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*), Bash(scripts/ui
 
 对照参考图反复调 UI。每轮结束前必须贴截图 + 固定差异表，不允许"我觉得差不多了"。
 
+## 硬门禁
+
+- **没有浏览器截图，不准改代码**：当前页面状态必须来自 `ui-visual-capture.sh` 或显式 `agent-browser open ... && agent-browser screenshot ...`，只读用户给的参考图不算 Capture。
+- **Capture 必须可见**：每轮报告都要贴出实际执行的命令、截图路径、DOM snapshot 路径；如果命令失败，先修 Capture 或报告 blocker，不要继续凭截图/记忆改样式。
+- **Change 后必须 Re-capture**：凡是改了 UI 文件，下一步只能重新打开页面并截图；没有 Re-capture + 新差异表，不准进入总结/验证/交付。
+- **不要阶段性停在一轮**：只要差异表还有 `偏/差异大/未通过`，且不是 blocker 或用户显式叫停，就立即进入下一轮。
+
 ## 核心循环
 
 ```
-Declare → Capture → Diff → Change → Re-capture → 直到差异表全列"接近"
+Declare → Capture → Diff → Change → Re-capture → Diff → Change → Re-capture → ... → 直到差异表全列"接近"
 ```
 
 一轮只动 1-2 个维度，不把所有差异一次全改，避免改完不知道谁在起作用。
@@ -35,7 +42,31 @@ Declare → Capture → Diff → Change → Re-capture → 直到差异表全列
 
 ## 2. Capture（自动截图）
 
-用仓库脚本：
+先做浏览器能力检查，不要假设工具存在：
+
+```
+command -v agent-browser || command -v npx
+```
+
+处理规则：
+
+| 状态 | 动作 |
+|---|---|
+| `agent-browser` 可用 | 直接用 `agent-browser open/screenshot/snapshot` |
+| 只有 `npx` 可用 | 用 `npx -y agent-browser ...` 临时执行，并在 Capture 里写清实际命令 |
+| `agent-browser` 报缺 Chromium/Chrome | 暂停视觉迭代，提示用户可运行 `agent-browser install`；只有用户明确同意代安装时才执行 |
+| `agent-browser` 和 `npx` 都不可用 | 暂停视觉迭代，提示安装命令，不要继续改 UI |
+
+推荐安装命令：
+
+```
+npm i -g agent-browser
+agent-browser install
+```
+
+全局安装或下载浏览器会修改用户环境/缓存，不能静默执行；除非用户明确说"帮我安装"或"可以代安装"。
+
+优先用仓库脚本，并把命令和 stdout Markdown 表原样贴进报告：
 
 ```
 bash scripts/ui-visual-capture.sh <url> [out_dir] \
@@ -44,6 +75,16 @@ bash scripts/ui-visual-capture.sh <url> [out_dir] \
 ```
 
 脚本会输出固定 Markdown 表（页面截图 / 元素截图 / DOM snapshot / meta）。把这段表原样贴进本轮报告。
+
+如果目标是 `localhost` 且脚本不在当前仓库，直接用 `agent-browser` 明确打开和截图：
+
+```
+agent-browser open <url> && agent-browser wait --load networkidle
+agent-browser screenshot /tmp/visual-qa/<round>/page.png
+agent-browser snapshot -i > /tmp/visual-qa/<round>/snapshot.txt
+```
+
+必须说明是**真实打开页面截图**，不是后台凭已有截图推断。
 
 ## 3. Diff（固定差异表，强制输出）
 
@@ -80,6 +121,14 @@ bash scripts/ui-visual-capture.sh <url> [out_dir] \
 
 不允许跳过这一步用"我改了应该行"代替。
 
+如果 Re-capture 失败：
+
+1. 不要继续改第二处样式
+2. 把失败命令、错误信息、当前已改文件列出来
+3. 先修复截图链路；修不好才报告 blocker
+
+Re-capture 后如果还有非 `接近` 项，直接开始 `Round N+1`，不要把它作为最终交付。
+
 ## 6. 停止条件
 
 只有满足任一条件才停：
@@ -90,6 +139,13 @@ bash scripts/ui-visual-capture.sh <url> [out_dir] \
 
 声称"已经接近参考图"但差异表里还有 `偏/差异大/未通过` = 不接受。
 
+禁止停止：
+
+- 只读了参考截图，没打开目标 URL
+- 只改了代码，没 Re-capture
+- 只跑了 lint/test/build，没做视觉复拍
+- 把"还剩留给 Round N+1"写进 Next 后就结束；除非用户要求暂停，否则必须继续 Round N+1
+
 ## 每轮输出模板（强制）
 
 ```markdown
@@ -99,7 +155,9 @@ bash scripts/ui-visual-capture.sh <url> [out_dir] \
 （前置声明表）
 
 ### Capture
-（ui-visual-capture.sh 输出的产物表原样贴入）
+- Command: `...`
+- Result: pass/fail
+（ui-visual-capture.sh 输出的产物表原样贴入，或 agent-browser 截图/snapshot 路径）
 
 ### Diff
 （视觉差异表）

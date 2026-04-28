@@ -79,6 +79,12 @@
       "role": "canonical"
     },
     {
+      "name": "think-compare",
+      "path": "skills/think-compare",
+      "domain": "think",
+      "role": "canonical"
+    },
+    {
       "name": "think-quality",
       "path": "skills/think-quality",
       "domain": "think",
