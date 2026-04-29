@@ -34,7 +34,7 @@ My Droid skills/scripts
 | `guard-ship` | 交付（PR 模式或直接发布模式） |
 | `guard-close` | 完成裁决；区分 Blocking / Risk / Polish / Adjacent |
 | `guard-gitops` | Git 仓库即唯一事实源；触碰线上/远程/部署产物前使用 |
-| `readable-rewrite` | 重写内容降低认知负担，不改事实与结论 |
+| `readable-final-answer` | 重写内容降低认知负担 + 最终答案/PR 描述/过程播报体裁规范 |
 | `readable-metrics` | 终端可扫描的指标表达 |
 | `assist-learn` | 经验沉淀为规则 / 模板 / 操作卡 |
 | `fe-ui-design` | 前端设计约束；创建 web 组件、页面或应用时使用 |

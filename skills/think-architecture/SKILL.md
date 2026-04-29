@@ -107,7 +107,7 @@ argument-hint: <系统/仓库/架构问题|目标|约束>
 - 标题要能独立表达小结论
 - 术语首次出现时解释
 - 不把 trade-off、边角条件、实施细节同时灌给读者
-- 遇到密文、大段黑话、绕句时，转 `/readable-rewrite` 或套用其规则
+- 遇到密文、大段黑话、绕句时，转 `/readable-final-answer` 或套用其规则
 
 ## 7. 自检
 
@@ -130,5 +130,5 @@ argument-hint: <系统/仓库/架构问题|目标|约束>
 
 - 技术选型或模式不确定 → `/think-research`
 - 需要把架构决策变成 spec → `/think-plan`
-- 表述太密、太绕、太难读 → `/readable-rewrite`
+- 表述太密、太绕、太难读 → `/readable-final-answer`
 - 要评估现有结构是否易改 → `/think-quality`

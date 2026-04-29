@@ -19,8 +19,8 @@
       "role": "brand-exception"
     },
     {
-      "name": "readable-rewrite",
-      "path": "skills/readable-rewrite",
+      "name": "readable-final-answer",
+      "path": "skills/readable-final-answer",
       "domain": "readable",
       "role": "canonical"
     },

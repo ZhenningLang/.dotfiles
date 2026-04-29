@@ -49,6 +49,27 @@ description: 当改动已完成但未 commit、需要确认没留调试遗留物
 - `guard-ship` 做交付前总预检（git status、敏感信息、分支），关注可交付性
 - 本 skill 最窄：只扫 diff 中的文本遗留物，不做逻辑判断
 
+## 编辑与 Git 礼仪（来自 codex 收编）
+
+### 编辑约束
+
+- 默认 ASCII；引入 Unicode 需要理由且文件已是该字符集
+- 注释克制：不写"赋值给变量"这类废话；复杂块前可加 1 行 orientation
+- 编辑用专用 patch 工具（Edit / MultiEdit / apply_patch），不用 `cat` 写文件
+- 不用 Python 小脚本读写文件（shell 或 patch 工具能干就用）
+
+### Dirty Worktree 礼仪
+
+- 工作树可能不干净；NEVER 回滚不是你做的改动（除非用户明确要求）
+- 提交 / 编辑时遇到不属于你的修改：在你触过的文件里先读懂、配合处理；在无关文件里 ignore
+- 仅当那些改动让任务无法完成时才向用户问
+
+### Git 红线
+
+- 不用 `git reset --hard`、`git checkout --`，除非用户明确要求
+- 模糊请求先问再动
+- 优先非交互 git 命令；不进交互 console
+
 ## Gotchas
 
 - TODO 不等于一定要删——有的 TODO 记录了真实后续工作，应转成 issue 或保留

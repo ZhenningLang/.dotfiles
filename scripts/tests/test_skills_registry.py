@@ -32,6 +32,7 @@ class SkillsRegistryTests(unittest.TestCase):
         "eng-unstuck",
         "eng-verify",
         "se-rewrite-readable",
+        "readable-rewrite",
     }
 
     CANONICAL_NAMES = {
@@ -46,8 +47,8 @@ class SkillsRegistryTests(unittest.TestCase):
         "guard-secure",
         "guard-ship",
         "guard-verify",
+        "readable-final-answer",
         "readable-metrics",
-        "readable-rewrite",
         "think-architecture",
         "think-map",
         "think-plan",
@@ -66,7 +67,7 @@ class SkillsRegistryTests(unittest.TestCase):
         self.assertIn("fe-ui-design", names)
         self.assertIn("assist-learn", names)
         self.assertIn("readable-metrics", names)
-        self.assertIn("readable-rewrite", names)
+        self.assertIn("readable-final-answer", names)
 
     def test_catalog_keeps_latest_names_only_for_renamed_skills(self) -> None:
         catalog = json.loads(CATALOG.read_text())

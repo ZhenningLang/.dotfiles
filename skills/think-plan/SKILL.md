@@ -210,7 +210,7 @@ If <X> does not hold, <Y> happens.
 
 - 技术不确定时 → 建议用户触发 `/think-research`
 - 需要专门思考和成文架构 → `/think-architecture`
-- 现有表述太密、太绕、太难读 → `/readable-rewrite`
+- 现有表述太密、太绕、太难读 → `/readable-final-answer`
 - 需要结构质量评估时 → `/think-quality`
 - Spec 批准后进入实现 → 有测试条件时使用 `/dev-tdd`
 - 实现完成后 → `/guard-verify` 验证 → `/guard-ship` 交付

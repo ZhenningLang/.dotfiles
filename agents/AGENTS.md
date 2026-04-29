@@ -71,6 +71,13 @@
 - 避免跨层穿透、隐式副作用、过度抽象、黑魔法式封装
 - 判断方案优先看影响面、可测试性、可 review 性，而不是作者主观偏好
 
+### 编辑与工具纪律
+
+- 编辑文件用专用 patch 工具，不用 `cat` / Python 小脚本写文件
+- 默认 ASCII；引入 Unicode 需要理由
+- 多文件读、多搜索尽量并行调用
+- 文风：不用 emoji、em dash、动物比喻填充；不用 seam / cut / safe-cut 这类自造隐喻
+
 ### 质量与验证
 
 - **TDD 强制**：新功能、bug 修复、行为变更时，必须先调用 `/dev-tdd` skill，走 Red→Green→Refactor 循环。先写失败测试再写实现，不是"写完实现补测试"。纯配置/文档/样式变更除外。
@@ -83,7 +90,7 @@
 - `think-*`：理解问题、调研、综述、架构、规划、结构判断、卡住排查
 - `dev-*`：调试、TDD、重构
 - `guard-*`：review、secure、verify、ship、close、check（交付前总入口）、gitops（触碰线上/远程/部署产物前默认触发 `/guard-gitops`）
-- `readable-*`：可读性重写、指标表达
+- `readable-*`：可读性重写、最终答案/过程播报体裁、指标表达
 - `assist-*`：经验沉淀；`fe-*` / `web-*` / `agent-*` / `hive` / `react-doctor` 处理专项能力
 
 常见工作流：
@@ -94,7 +101,7 @@
 - 外链调研（决策导向）：`/web-read` → `/think-research` → `/think-plan`
 - 主题综述（开放调研）：`/web-read` → `/think-survey` →（如需决策）`/think-research`
 - 资料消化（多源汇总）：`/think-survey` →（如需沉淀规则）`/assist-learn`
-- 表达太绕：`/readable-rewrite`；指标展示：`/readable-metrics`
+- 表达太绕 / 整理最终答案 / PR 描述：`/readable-final-answer`；指标展示：`/readable-metrics`
 
 ### 行为准则
 
