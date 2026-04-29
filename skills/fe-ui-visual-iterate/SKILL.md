@@ -1,6 +1,6 @@
 ---
 name: fe-ui-visual-iterate
-description: 当需要对照参考图反复迭代 UI 视觉效果、或持续对比当前界面与目标样式差异时使用；用 agent-browser 自动截图并按固定差异表对比参考图，小步迭代直到视觉收敛。
+description: 当需要对照参考图反复迭代 UI 视觉效果、或持续对比当前界面与目标样式差异时使用；产出截图证据与固定差异表，驱动到视觉收敛。
 argument-hint: <目标页面 URL|组件名|参考图路径>
 allowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*), Bash(scripts/ui-visual-capture.sh:*)
 ---

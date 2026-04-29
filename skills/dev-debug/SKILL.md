@@ -1,6 +1,6 @@
 ---
 name: dev-debug
-description: 当出现 bug、错误、异常行为或复现不稳定时使用；先复现和定位，再修复。
+description: 当出现 bug、错误、异常行为或复现不稳定时使用；定位故障并产出可验证的修复方案。
 argument-hint: <bug 描述|错误信息|复现步骤>
 ---
 

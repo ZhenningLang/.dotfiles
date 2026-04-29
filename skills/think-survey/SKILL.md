@@ -1,6 +1,6 @@
 ---
 name: think-survey
-description: 当需要对一个开放性主题做多源资料调研、汇总现状、归类流派并产出结构化综述时使用；偏综述与归类，不强制下决策推荐（与 think-research 的差异：survey 偏现状梳理，research 偏选型判断）。
+description: 当需要对一个开放性主题做多源资料调研、汇总现状、归类流派并产出结构化综述时使用；产出现状/流派/分歧综述（与 think-research 区别：本 skill 不强制下决策）。
 argument-hint: <主题|多源资料路径/URL>
 ---
 

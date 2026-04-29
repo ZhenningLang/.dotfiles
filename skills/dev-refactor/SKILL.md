@@ -1,6 +1,6 @@
 ---
 name: dev-refactor
-description: 当代码出现重复、结构债、可读性下降或需要基于历史摩擦点定位重构对象时使用；产出可勾选的 Refactor Spec / Todo List，按 Tidy First 与 Fowler 手法分阶段执行。
+description: 当代码出现重复、结构债、可读性下降或需要基于历史摩擦点定位重构对象时使用；产出可勾选的 Refactor Spec / Todo List 与重构范围裁决。
 argument-hint: <branch|uncommitted|history|文件/目录/符号名>
 ---
 

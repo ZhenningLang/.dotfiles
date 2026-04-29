@@ -1,6 +1,6 @@
 ---
 name: guard-close
-description: 当任务接近完成、需要判断是否该继续，或中途出现 scope creep / 边际收益递减时使用；把必须项与可选 backlog 分开，并给出停止裁决。
+description: 当任务接近完成、需要判断是否该继续，或中途出现 scope creep / 边际收益递减时使用；产出必须项 vs 可选 backlog 切分与停止裁决（与 guard-check 区别：本 skill 只判停/继续，不做交付检查）。
 argument-hint: <当前目标|交付范围|留空=当前任务>
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: guard-review
-description: 当存在未 review 的代码变更或需要在合并前把关时使用；默认先看 diff，再给分级结论与 merge 裁决。
+description: 当存在未 review 的代码变更或需要在合并前把关时使用；产出分级问题清单与 merge 裁决。
 argument-hint: <分支名|commit-range|--deep|留空=未提交变更>
 ---
 

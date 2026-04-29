@@ -1,6 +1,6 @@
 ---
 name: think-refine
-description: 当需求模糊、边界不清或存在多种合理解释时使用；交互式 refinement 直到明确再执行。
+description: 当需求模糊、边界不清或存在多种合理解释时使用；交互式澄清需求边界与验收标准。
 ---
 
 # Refine

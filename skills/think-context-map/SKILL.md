@@ -1,6 +1,6 @@
 ---
 name: think-context-map
-description: 当任务需要改动多个文件或影响面不明时使用；改动前画出文件地图 + 依赖 + 测试 + 风险 checklist。
+description: 当任务需要改动多个文件或影响面不明时使用；产出单次任务的文件地图 + 依赖 + 测试 + 风险 checklist（与 think-map 区别：本 skill 聚焦单次任务，think-map 聚焦仓库全局）。
 ---
 
 # Context Map

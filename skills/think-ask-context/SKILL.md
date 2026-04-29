@@ -1,6 +1,6 @@
 ---
 name: think-ask-context
-description: 当 agent 准备回答复杂问题但未掌握所有相关文件、或怀疑上下文不足时使用；强制先声明信息需求再回答。
+description: 当 agent 准备回答复杂问题但未掌握所有相关文件、或怀疑上下文不足时使用；输出信息需求清单作为回答前置。
 ---
 
 # Ask Context
