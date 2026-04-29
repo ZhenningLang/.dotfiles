@@ -80,7 +80,7 @@
 
 ### Skill 路由总览
 
-- `think-*`：理解问题、调研、架构、规划、结构判断、卡住排查
+- `think-*`：理解问题、调研、综述、架构、规划、结构判断、卡住排查
 - `dev-*`：调试、TDD、重构
 - `guard-*`：review、secure、verify、ship、close、check（交付前总入口）、gitops（触碰线上/远程/部署产物前默认触发 `/guard-gitops`）
 - `readable-*`：可读性重写、指标表达
@@ -91,7 +91,9 @@
 - 新需求 / 大改动：`/think-map` → `/think-plan` → `/dev-tdd` → `/guard-verify` → `/guard-ship`
 - Bug / 异常：`/dev-debug` → （必要时 `/dev-tdd` / `/dev-refactor`）→ `/guard-verify`
 - 交付前总检查：`/guard-check` → 按需路由到 `/guard-review` / `/guard-secure` / `/guard-verify` / `/guard-ship`
-- 外链调研：`/web-read` → `/think-research` → `/think-plan`
+- 外链调研（决策导向）：`/web-read` → `/think-research` → `/think-plan`
+- 主题综述（开放调研）：`/web-read` → `/think-survey` →（如需决策）`/think-research`
+- 资料消化（多源汇总）：`/think-survey` →（如需沉淀规则）`/assist-learn`
 - 表达太绕：`/readable-rewrite`；指标展示：`/readable-metrics`
 
 ### 行为准则

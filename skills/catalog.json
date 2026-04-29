@@ -191,6 +191,12 @@
       "path": "skills/fe-ui-visual-iterate",
       "domain": "fe",
       "role": "canonical"
+    },
+    {
+      "name": "think-survey",
+      "path": "skills/think-survey",
+      "domain": "think",
+      "role": "canonical"
     }
   ]
 }
