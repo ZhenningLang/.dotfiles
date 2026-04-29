@@ -6,6 +6,21 @@ argument-hint: <当前卡点/失败模式>
 
 连续失败时按以下等级升级行为约束。每级绑定强制动作，不只是"再试一次"。
 
+## Handoff 接续（与 dev-debug 对齐）
+
+如果上游 `/dev-debug` 已用 Handoff 格式交接进来（连续 3 次假设验证失败触发），不要重新组织信息，直接接同一组表头继续推进：
+
+1. **Symptom** — 症状描述 + 复现命令
+2. **Hypotheses Tested** — 已试过哪些假设 + 为什么失败
+3. **Evidence Collected** — 已经掌握的事实数据
+4. **Ruled Out** — 已被证伪的方向
+5. **Unknowns** — 仍不清楚的关键点
+6. **Suggested Next Steps** — 建议路径，至少 2 个候选
+
+think-unstuck 的工作是在这份 Handoff 上继续推进：补充 Evidence、扩充 Hypotheses、收敛 Unknowns，直到 Suggested Next Steps 收敛到可执行单一动作或进入"结构化退出"。
+
+非 Handoff 路径（用户手动触发或从其它 skill 进入）按下方压力升级流程走。最终若需要退出，仍用同一组 6 表头，让两个 skill 输出格式一致。
+
 ## 压力升级
 
 | 连续失败 | 级别 | 强制动作 |

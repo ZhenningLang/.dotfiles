@@ -49,6 +49,19 @@ Return（固定格式）:
   | 文件 | churn | 共变邻居 | 复杂度 | bug 触及 | 推断 smell |
 ```
 
+#### Token / 工具调用预算（硬约束）
+
+子 agent 必须在以下预算内完成，否则截断输出：
+
+- 工具调用 ≤ 5 次（git log 命令 + 必要的 Read/Grep，超过即收尾）
+- 输出 ≤ 800 tokens（超过用 top-K 截断 + 省略号）
+- 默认先跑 `git log` 概览（churn / co-change / bug-touch 三条），**不要**直接读全文件；只对 top-K 候选做选择性 Read
+- 输出固定使用上面的卡片表格，**不要**自由叙述、不要分章节、不要添加结论性建议
+
+预算耗尽时的优雅降级：
+- 已完成 churn 排序但未做共变分析 → 输出仅含 churn 列的简表，标注 `[预算截断: 共变 / bug-touch 未跑]`
+- top-K 文件未全部 Read → 只填能填的 smell 列，未读的标 `[未读]`
+
 ### 自动降级
 
 - 历史 < 30 commit → 提示"历史信号不足，回退到结构分析"，跳过本节
@@ -224,6 +237,20 @@ refactor(billing): Replace Conditional with Polymorphism (PaymentMethod)
 - 改完验证成本反而更高，通常不是好重构
 - history 模式下 churn ≠ 一定要改；hotspot 是**候选**，主流程裁决才是结论
 - 子 agent 的输出永远是证据不是判断；不要直接采纳为重构计划
+
+### Framework-aware dead code 白名单
+
+删死代码前，必须排除以下模式（这些不是死代码，仅看显式引用会误删）：
+
+- ORM 基类继承（SQLAlchemy `declarative_base`、Django `Model`、Pydantic `BaseModel`）—— 框架按元类/注册表收集，不靠 import
+- IaC 资源类（CDK `Stack`、Terraform module）—— 由 synth/apply 阶段实例化
+- React/JSX 组件 —— 即使没有显式 import，也可能在路由表、动态加载点、字符串映射中被使用
+- 装饰器注册（`@app.route`、`@register`、`@hook` 类）—— 引用发生在装饰器执行期
+- 通过 `importlib` / `require` / `__import__` 等动态加载的模块
+- 测试 fixture（pytest fixtures、jest setup）—— conftest.py 名字本身就是契约
+- 类型定义文件（`.d.ts`、stub 文件）—— 只在编译/类型检查阶段被使用
+
+判断流程：先搜框架特征（基类、装饰器、约定路径），再搜显式引用。两类都没命中，再判定为死代码。
 
 ## 禁止
 

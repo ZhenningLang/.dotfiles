@@ -40,6 +40,20 @@ REFACTOR → 消除重复、改名、提取（保持绿灯）
 - Mock 只在外部边界使用（fs/http/db），不 mock 内部纯函数
 - 提交模式：`test(scope): failing test` → `feat(scope): implement`
 
+## Anti-Rationalization Guard
+
+不要在 RED 之前给自己找退出借口。常见借口与反驳：
+
+| 借口 | 反驳 |
+|---|---|
+| "代码太简单不用测" | 简单代码也会坏，写一个测试只要 30 秒 |
+| "先实现再补测试更快" | 那叫 "test-after"，不叫 TDD |
+| "这只是 spike，不需要 TDD" | 把它标成 spike，不要混进 main |
+| "测试通过了 = 任务完成" | 还没 refactor 这一步 |
+| "外部接口我控不了，没法测" | mock 边界即可，不要让"难"代替"不做" |
+
+发现自己在用以上句式说服自己跳过 RED，停一步：要么诚实标记 spike（隔离分支、不进 main），要么按 RED→GREEN→REFACTOR 走完。
+
 ## Gotchas
 
 - 先写实现、再补测试，不叫 TDD

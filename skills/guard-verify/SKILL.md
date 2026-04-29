@@ -28,6 +28,40 @@ bash scripts/run-verify.sh
 - 输出固定 Markdown 表，agent 直接贴进报告作为 Evidence
 - exit code 0=全绿，1=有失败，2=无任何可检测命令（需要手动补）
 
+### Verification: None 强制声明
+
+当出现以下任一情况时，**禁止**在报告里写 "verified pass"：
+
+- `scripts/run-verify.sh` 退出码为 `2`（无任何可探测的 test / lint / build 命令）
+- 没有探测到自动化测试入口，且本次也未补 characterization
+- 仅靠"看上去对"或"本地手动跑过一次"作为证据
+
+此时必须在报告中显式输出一行：
+
+```
+verification: none -- structural gap
+```
+
+并把"补可执行验证"列入"待补 / Followups"，不能让缺验证伪装成通过。
+
+## 验证三层级（每条 Deliverable 都必须分别给 L1/L2/L3 证据）
+
+文件 / 函数能找到 ≠ 实现到位。三层级缺一不算 verified：
+
+| 层级 | 含义 | 不充分的反例 |
+|---|---|---|
+| **L1 Exists** | 目标文件 / 函数 / 路由 / 配置 / 命令在仓库里真实存在 | 只能找到名字但函数体是 `pass` / `TODO` |
+| **L2 Substantive** | 实现非空、有真实逻辑、不是 stub / placeholder / 抛 NotImplemented | 函数返回硬编码常量、永远走 happy path |
+| **L3 Wired** | 调用方真的接到了：被路由注册、被前端引用、被 CLI 暴露、CI 真的会跑 | 实现存在但没人调用，孤岛代码 |
+
+每条 must-have 必须分别提供：
+
+- L1 证据：`Grep` / `Glob` / `LS` 命中（路径 + 行号）
+- L2 证据：函数体片段、关键分支或具体行为说明
+- L3 证据：调用点、注册位置、入口绑定（路径 + 行号）
+
+任意层级缺证据 → 该条交付物状态为 `partial`，不能算 verified pass。
+
 ## 输出格式
 
 完成报告必须包含以下固定结构：
@@ -35,17 +69,19 @@ bash scripts/run-verify.sh
 ```markdown
 ## 验证结果
 
-### Deliverables
-| # | 交付物 | 验证命令 / 操作 | 证据 |
-|---|--------|----------------|------|
-| 1 | <用户要求 1> | <命令或操作> | <输出片段或截图> |
-| 2 | <用户要求 2> | ... | ... |
+### Deliverables（三层级，缺一不可）
+| # | 交付物 | L1 Exists | L2 Substantive | L3 Wired | 状态 |
+|---|--------|-----------|----------------|----------|------|
+| 1 | <用户要求 1> | path:line | 行为/逻辑片段 | 调用点 path:line | verified / partial |
+| 2 | <用户要求 2> | ... | ... | ... | ... |
 
 ### 自动验证（scripts/run-verify.sh）
 | Check | Command | Result | Evidence |
 |-------|---------|--------|----------|
 | tests | `...` | pass (Ns) | N passed |
 | lint  | `...` | pass | ... |
+
+（若 exit=2 / 未探测到测试命令 / 无 characterization：在此节末尾追加 `verification: none -- structural gap`）
 
 ### 结构性评估
 - 影响面: ...
@@ -59,6 +95,17 @@ bash scripts/run-verify.sh
 - 测试/构建通过 ≠ 用户可感知行为已经成立；交付物必须单独验收
 - "应该没问题"/"改动很小不需要验证" = 不接受
 - 验证失败 → 修复 → 重新验证，直到通过
+
+## Anti-Rationalization Guard
+
+声称"已验证"前常见的"放行借口"，命中即拒绝标 verified pass：
+
+| 借口 | 反驳 |
+|---|---|
+| "本地手测过了" | 必须在仓库测试套件里跑通；本地一次性手测不算证据 |
+| "测试改了但意图不变" | 测试改写需独立 review，不能既当被验证对象又当验证者 |
+| "没探测到测试命令但能编译" | 编译 ≠ 验证；走 `verification: none -- structural gap` 流程 |
+| "之前同类改过没问题" | 每次必须重跑当前 diff，不能继承上次结论 |
 
 ## Gotchas
 

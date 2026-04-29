@@ -43,8 +43,24 @@ python3 scripts/collect_diff.py a1b2..HEAD   # commit 范围
 - [ ] 架构：关注点分离、耦合度、依赖方向
 - [ ] 安全：输入验证、敏感数据、注入风险
 - [ ] 测试：覆盖关键路径、测试行为而非实现
-- [ ] 需求：变更是否满足目标、无范围蔓延
+- [ ] 需求：变更是否满足目标
+- [ ] Drift Signals（scope drift 自动检查，命中任意一条 → Important 起步）：
+  - [ ] diff 含与 PR 标题/描述无关的文件
+  - [ ] 纯重构与行为变更混合在同一 commit
+  - [ ] 引入 PR 描述未提及的新依赖
+  - [ ] 删除看似不相关的代码
+  - [ ] 引入未被本次需求要求的新抽象 / 封装层
 - [ ] 可修改性：改动是否局部、规则是否显式、是否破坏既有 convention、diff 是否足够单一
+
+### Hard Stops（必须阻断 merge，优先级高于 Critical）
+
+命中任意一条 → 结论必须是 `Ready to merge? No`，不能用 `With fixes` 兜底：
+
+- **Destructive auto-execution**：diff 引入了 `rm -rf`、`DROP TABLE`、强制覆盖远端等无交互直接执行的破坏性命令
+- **Hallucinated identifier**：diff 引用的函数 / 变量 / 模块 / 路径在仓库中不存在（LLM 幻觉典型，必须 Grep 验证）
+- **Injection 风险**：SQL / shell command / HTML / 路径拼接未做转义或参数化
+- **依赖未锁定**：新增依赖未同步出现在 lock 文件（`package-lock.json` / `pnpm-lock.yaml` / `poetry.lock` / `Cargo.lock` / `go.sum` 等）
+- **悄悄删除测试 / release artifact**：删除既有测试、CI 配置、release 产物或 changelog，且 PR 描述无对应说明
 
 ### 输出格式
 
@@ -54,15 +70,31 @@ python3 scripts/collect_diff.py a1b2..HEAD   # commit 范围
 - 文件: N
 - +Added / -Removed
 
+### Hard Stops
+- [ ] Destructive auto-execution
+- [ ] Hallucinated identifier
+- [ ] Injection 风险
+- [ ] 新增依赖未在 lock 文件中
+- [ ] 删除测试 / release artifact 无说明
+（任一命中 → Ready to merge? No）
+
 ### Strengths
 - [具体优点，带 file:line]
 
 ### Issues
 | Priority | File:Line | Issue | 影响 | 修复建议 |
 |----------|-----------|-------|------|----------|
+| Hard Stop | path:7 | <一句话> | <失败路径> | <建议> |
 | Critical | path:42 | <一句话> | <失败路径> | <建议> |
 | Important | path:118 | ... | ... | ... |
 | Minor | path:200 | ... | ... | ... |
+
+### Drift Signals
+- [ ] 文件与 PR 标题无关
+- [ ] 重构与行为变更混合
+- [ ] 新依赖未在描述中提及
+- [ ] 不相关代码被删除
+- [ ] 新增未要求的抽象层
 
 ### Out-of-scope observations
 - [范围外但值得记录的观察；不影响当前 Ready to merge 结论]
@@ -72,6 +104,7 @@ python3 scripts/collect_diff.py a1b2..HEAD   # commit 范围
 
 ### Assessment
 Ready to merge? Yes / No / With fixes
+（命中 Hard Stop → 必须 No；命中 Drift Signal → 不能 Yes）
 ```
 
 ## 3. Deep Review（--deep）
@@ -93,7 +126,19 @@ Ready to merge? Yes / No / With fixes
 3. 不合理 → 带理由推回（破坏现有功能 / 违反 YAGNI / 技术不适用）
 4. 不明确 → 全部澄清后再动手
 
-## 5. Gotchas
+## 5. Anti-Rationalization Guard
+
+review 时常见的"放行借口"，命中即拒绝放行：
+
+| 借口 | 反驳 |
+|---|---|
+| "这只是小重构" | 重构和行为变更不能混 commit；先拆 |
+| "测试在临时文件先验证一下" | 临时文件测试不算数，必须落到仓库测试套件 |
+| "现在没时间补测试" | 风险高于测试成本时不允许跳过 |
+| "agent 应该知道我意图" | 沉默选边禁止；意图必须在 PR 描述/commit message 显式表达 |
+| "审过类似的 PR 这次也行" | 每个 diff 独立审，不能继承上一次结论 |
+
+## 6. Gotchas
 
 - 没有明确失败路径、触发条件和影响面，不要上升到 `Critical` / `Important`
 - review 的对象默认是当前 diff，不是借题发挥做全仓库猎巫
